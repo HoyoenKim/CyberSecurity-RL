@@ -139,60 +139,61 @@ class EpisodeReplayMemory:
     """
 
     def __init__(self, capacity: int, seq_len: int):
-        self.capacity = capacity              # 총 step 수 기준
+        self.capacity = capacity
         self.seq_len = seq_len
         self.episodes: List[List[Transition]] = []
         self.current_episode: List[Transition] = []
         self.num_steps: int = 0
 
     def push(self, *args):
-        """Saves a transition (state, action, next_state, reward, done)."""
         transition = Transition(*args)
         self.current_episode.append(transition)
         self.num_steps += 1
 
         done = bool(transition.done.item() > 0.5)
         if done:
-            # 에피소드 종료 → episodes로 넘기고 새 에피소드 시작
             if self.current_episode:
                 self.episodes.append(self.current_episode)
             self.current_episode = []
 
-        # capacity 초과하면 오래된 에피소드부터 제거
-        while self.num_steps > self.capacity and self.episodes:
-            removed = self.episodes.pop(0)
-            self.num_steps -= len(removed)
+        # ✅ capacity 초과 시: 과거 episode부터 제거
+        # ✅ episode가 하나도 없고 current만 길어지는 경우도 잘라줌
+        while self.num_steps > self.capacity:
+            if self.episodes:
+                removed = self.episodes.pop(0)
+                self.num_steps -= len(removed)
+            elif self.current_episode:
+                self.current_episode.pop(0)
+                self.num_steps -= 1
+            else:
+                break
 
     def __len__(self):
         return self.num_steps
 
     def sample(self, batch_size: int):
-        """길이 seq_len인 시퀀스 batch를 샘플링."""
-        # seq_len 이상 길이 가진 에피소드만 사용
         eligible_episodes = [ep for ep in self.episodes if len(ep) >= self.seq_len]
+
+        # ✅ 진행 중 에피소드도 길이가 충분하면 샘플 후보에 포함
+        if len(self.current_episode) >= self.seq_len:
+            eligible_episodes.append(self.current_episode)
+
         if not eligible_episodes:
             raise ValueError("Not enough episodes with length >= seq_len to sample from.")
 
-        # 에피소드 단위로 with replacement 샘플링
         batch_episodes = random.choices(eligible_episodes, k=batch_size)
 
-        state_seqs = []
-        action_seqs = []
-        reward_seqs = []
-        next_state_seqs = []
-        done_seqs = []
-
+        state_seqs, action_seqs, reward_seqs, next_state_seqs, done_seqs = [], [], [], [], []
         for ep in batch_episodes:
             max_start = len(ep) - self.seq_len
             start_idx = random.randint(0, max_start)
             window = ep[start_idx : start_idx + self.seq_len]
 
-            # 각 step의 텐서를 이어붙여서 [seq_len, dim] 형태로 만든다.
-            s_seq = torch.cat([tr.state for tr in window], dim=0)          # [T, state_dim]
-            a_seq = torch.cat([tr.action for tr in window], dim=0)         # [T, 1]
-            r_seq = torch.cat([tr.reward for tr in window], dim=0)         # [T]
-            ns_seq = torch.cat([tr.next_state for tr in window], dim=0)    # [T, state_dim]
-            d_seq = torch.cat([tr.done for tr in window], dim=0)           # [T]
+            s_seq  = torch.cat([tr.state for tr in window], dim=0)       # [T, D]
+            a_seq  = torch.cat([tr.action for tr in window], dim=0)      # [T, 1]
+            r_seq  = torch.cat([tr.reward for tr in window], dim=0)      # [T]
+            ns_seq = torch.cat([tr.next_state for tr in window], dim=0)  # [T, D]
+            d_seq  = torch.cat([tr.done for tr in window], dim=0)        # [T]
 
             state_seqs.append(s_seq)
             action_seqs.append(a_seq)
@@ -200,12 +201,11 @@ class EpisodeReplayMemory:
             next_state_seqs.append(ns_seq)
             done_seqs.append(d_seq)
 
-        # [batch, T, ...] 형태로 스택
-        state_batch = torch.stack(state_seqs, dim=0).to(device)         # [B, T, state_dim]
-        action_batch = torch.stack(action_seqs, dim=0).to(device)       # [B, T, 1]
-        reward_batch = torch.stack(reward_seqs, dim=0).to(device)       # [B, T]
-        next_state_batch = torch.stack(next_state_seqs, dim=0).to(device)  # [B, T, state_dim]
-        done_batch = torch.stack(done_seqs, dim=0).to(device)           # [B, T]
+        state_batch      = torch.stack(state_seqs, dim=0).to(device)       # [B, T, D]
+        action_batch     = torch.stack(action_seqs, dim=0).to(device)      # [B, T, 1]
+        reward_batch     = torch.stack(reward_seqs, dim=0).to(device)      # [B, T]
+        next_state_batch = torch.stack(next_state_seqs, dim=0).to(device)  # [B, T, D]
+        done_batch       = torch.stack(done_seqs, dim=0).to(device)        # [B, T]
 
         return state_batch, action_batch, reward_batch, next_state_batch, done_batch
 
@@ -222,16 +222,17 @@ class DRQN(nn.Module):
         super(DRQN, self).__init__()
 
         model = CyberBattleStateActionModel(ep)
-        self.input_dim = len(model.state_space.dim_sizes)
         self.output_dim = model.action_space.flat_size()
         self.hidden_size = hidden_size
 
-        self.fc_in = nn.Linear(self.input_dim, hidden_size)
+        # ✅ 입력차원 자동 추론
+        self.fc_in = nn.LazyLinear(hidden_size)
+
         self.lstm = nn.LSTM(
             input_size=hidden_size,
             hidden_size=hidden_size,
             num_layers=1,
-            batch_first=True,  # 입력: [B, T, D]
+            batch_first=True,
         )
         self.fc_out = nn.Linear(hidden_size, self.output_dim)
 
@@ -309,6 +310,7 @@ class DeepQLearnerPolicy(Learner):
         self.gamma = gamma
         self.learning_rate = learning_rate
         self.seq_len = seq_len
+        self._nets_initialized = False
 
         # DRQN 네트워크 (policy / target)
         self.policy_net = DRQN(ep, hidden_size=drqn_hidden_size).to(device)
@@ -332,6 +334,33 @@ class DeepQLearnerPolicy(Learner):
     def new_episode(self) -> None:
         """에피소드 시작마다 hidden 초기화"""
         self.hidden_policy = None
+
+    @torch.no_grad()
+    def _ensure_nets_initialized(self, state_dim: int) -> None:
+        if self._nets_initialized:
+            return
+
+        dummy = torch.zeros(1, 1, state_dim, device=device)
+
+        # LazyLinear 파라미터 실제 생성
+        self.policy_net(dummy, None)
+        self.target_net(dummy, None)
+
+        # ✅ 생성 직후 타깃 동기화
+        self.target_net.load_state_dict(self.policy_net.state_dict())
+        self.target_net.eval()
+
+        self._nets_initialized = True
+
+    @torch.no_grad()
+    def _advance_hidden_with_state(self, actor_state: ndarray) -> None:
+        state_dim = int(np.asarray(actor_state).shape[0])
+        self._ensure_nets_initialized(state_dim)
+
+        x = torch.as_tensor(actor_state, dtype=torch.float32, device=device).view(1, 1, -1)  # [1,1,D]
+        _, h = self.policy_net(x, self.hidden_policy)
+        # 안전하게 detach
+        self.hidden_policy = (h[0].detach(), h[1].detach())
 
     def parameters_as_string(self):
         return (
@@ -456,12 +485,9 @@ class DeepQLearnerPolicy(Learner):
     ):
         """환경에서 한 step 진행된 뒤 호출됨."""
         agent_state = wrapped_env.state
-
-        # ★ 에피소드 종료 조건: done OR truncated
         terminal = done or truncated
 
         if terminal:
-            # 다음 상태 없음 → next_actor_state=None
             self.update_q_function(
                 reward,
                 actor_state=action_metadata.actor_state,
@@ -480,14 +506,7 @@ class DeepQLearnerPolicy(Learner):
                 next_actor_state=next_actor_state,
             )
 
-        # ★ 실제 transition을 따라 hidden 업데이트
-        with torch.no_grad():
-            state_tensor = torch.as_tensor(
-                action_metadata.actor_state,
-                dtype=torch.float32,
-                device=device,
-            ).unsqueeze(0).unsqueeze(0)  # [1, 1, D]
-            _, self.hidden_policy = self.policy_net(state_tensor, self.hidden_policy)
+        # ✅ hidden 업데이트는 여기서 하지 않음 (exploit/explore에서만 1회)
 
     def end_of_episode(self, i_episode, t):
         # Update the target network, copying all weights and biases in DRQN
@@ -506,22 +525,26 @@ class DeepQLearnerPolicy(Learner):
         DRQN hidden을 이용하기 위해 states_to_consider를 하나의 시퀀스로 보고
         [1, T, D] 형태로 넣되, hidden_policy는 건드리지 않고 복사본으로 쓴다.
         """
+        if not states_to_consider:
+            return [], []
+        self._ensure_nets_initialized(int(np.asarray(states_to_consider[0]).shape[0]))
         with torch.no_grad():
-            state_batch = torch.tensor(states_to_consider, dtype=torch.float32, device=device)  # [T, D]
-            state_seq = state_batch.unsqueeze(0)  # [1, T, D]
+            B = len(states_to_consider)
+            x = torch.tensor(states_to_consider, dtype=torch.float32, device=device).unsqueeze(1)  # [B,1,D]
 
-            # hidden은 복사해서 사용 (실제 self.hidden_policy는 유지)
             h0 = None
             if self.hidden_policy is not None:
                 h, c = self.hidden_policy
-                h0 = (h.detach().clone(), c.detach().clone())
+                # batch 크기에 맞춰 복제
+                h0 = (h.detach().repeat(1, B, 1), c.detach().repeat(1, B, 1))
 
-            q_seq, _ = self.policy_net(state_seq, h0)  # [1, T, A]
-            q_seq = q_seq.squeeze(0)                   # [T, A]
+            q, _ = self.policy_net(x, h0)  # [B,1,A]
+            q = q.squeeze(1)              # [B,A]
 
-            max_q, max_idx = q_seq.max(1)              # [T]
-            action_lookups = max_idx.tolist()
+            max_q, max_idx = q.max(1)     # [B]
+            action_lookups = [np.int32(i) for i in max_idx.tolist()]
             expectedq_lookups = max_q.tolist()
+
         return action_lookups, expectedq_lookups
 
     def metadata_from_gymaction(self, wrapped_env, gym_action):
@@ -540,6 +563,9 @@ class DeepQLearnerPolicy(Learner):
         """Random exploration that avoids repeating actions previously taken in the same state"""
         gym_action = wrapped_env.env.sample_valid_action(kinds=[0, 1, 2])
         metadata = self.metadata_from_gymaction(wrapped_env, gym_action)
+
+        # ✅ 현재 관측(선택된 actor_state) 1회 반영
+        self._advance_hidden_with_state(metadata.actor_state)
         return "explore", gym_action, metadata
 
     def try_exploit_at_candidate_actor_states(self, wrapped_env, current_global_state, actor_features, abstract_action):
@@ -552,8 +578,7 @@ class DeepQLearnerPolicy(Learner):
         )
 
         if gym_action:
-            assert actor_node is not None, "actor_node should be set together with gym_action"
-
+            assert actor_node is not None
             return (
                 action_style,
                 gym_action,
@@ -564,31 +589,19 @@ class DeepQLearnerPolicy(Learner):
                     actor_state=actor_state,
                 ),
             )
-        else:
-            # learn the failed exploit attempt in the current state
-            self.update_q_function(
-                reward=0.0,
-                actor_state=actor_state,
-                next_actor_state=actor_state,
-                abstract_action=abstract_action,
-            )
 
-            return "exploit[undefined]->explore", None, None
+        # ✅ 가짜 transition 학습 제거
+        return "exploit[undefined]->explore", None, None
 
     def exploit(self, wrapped_env, observation) -> Tuple[str, Optional[cyberbattle_env.Action], object]:
-        # 현재 구현에서는 credcache_policy는 사용하지 않고 pure DRQN만 사용
-
         current_global_state = self.stateaction_model.global_features.get(wrapped_env.state, node=None)
 
-        # Gather the features of all the current active actors (i.e. owned nodes)
         active_actors_features: List[ndarray] = [
             self.stateaction_model.node_specific_features.get(wrapped_env.state, from_node)
             for from_node in w.owned_nodes(observation)
         ]
-
         unique_active_actors_features: List[ndarray] = list(np.unique(active_actors_features, axis=0))
 
-        # array of actor state vector for every possible set of node features
         candidate_actor_state_vector: List[ndarray] = [
             self.get_actor_state_vector(current_global_state, node_features)
             for node_features in unique_active_actors_features
@@ -601,7 +614,6 @@ class DeepQLearnerPolicy(Learner):
             _, remaining_candidate_index = random_argmax(remaining_expectedq_lookups)
             actor_index = remaining_candidate_indices[remaining_candidate_index]
             abstract_action = remaining_action_lookups[remaining_candidate_index]
-
             actor_features = unique_active_actors_features[actor_index]
 
             action_style, gym_action, metadata = self.try_exploit_at_candidate_actor_states(
@@ -612,6 +624,8 @@ class DeepQLearnerPolicy(Learner):
             )
 
             if gym_action:
+                # ✅ 선택된 상태를 1회만 hidden에 반영
+                self._advance_hidden_with_state(metadata.actor_state)
                 return action_style, gym_action, metadata
 
             remaining_candidate_indices.pop(remaining_candidate_index)

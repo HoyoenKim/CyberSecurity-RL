@@ -3,6 +3,7 @@
 
 """Plotting helpers for agent banchmarking"""
 
+import textwrap
 import matplotlib.pyplot as plt  # type:ignore
 import numpy as np
 
@@ -96,16 +97,50 @@ def plot_all_episodes(r):
     plt.show()
 
 
-def plot_averaged_cummulative_rewards(title, all_runs, show=True, save_at=None):
+def plot_averaged_cummulative_rewards(
+    title,
+    all_runs,
+    show=True,
+    save_at=None,
+    legend_outside=True,
+    wrap_width=60,
+    legend_fontsize=7,
+    right_margin=0.72,
+    dpi=200,
+):
     """Plot averaged cumulative rewards"""
     new_plot(title)
+
+    ax = plt.gca()
     for r in all_runs:
         plot_episodes_rewards_averaged(r)
-    plt.legend(loc="lower right")
+
+    # legend 라벨이 너무 길면 줄바꿈
+    handles, labels = ax.get_legend_handles_labels()
+    if wrap_width and labels:
+        labels = [textwrap.fill(l, width=wrap_width, break_long_words=False) for l in labels]
+
+    if labels:
+        if legend_outside:
+            ax.legend(
+                handles, labels,
+                loc="center left",
+                bbox_to_anchor=(1.02, 0.5),
+                borderaxespad=0.0,
+                fontsize=legend_fontsize,
+                frameon=True,
+            )
+            plt.gcf().subplots_adjust(right=right_margin)  # 오른쪽에 legend 공간 확보
+        else:
+            ax.legend(loc="lower right", fontsize=legend_fontsize)
+
     if save_at:
-        plt.savefig(save_at)
+        plt.savefig(save_at, dpi=dpi, bbox_inches="tight")  # 바깥 legend 안 잘리게
+
     if show:
         plt.show()
+    else:
+        plt.close()
 
 
 def plot_averaged_availability(title, all_runs, show=False):
