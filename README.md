@@ -79,11 +79,19 @@ Exploit step images are genearated. (Not gif)
 ./notebooks/run_transfer_dql.sh python3
 ```
 
+![dql_4train_10oneshot](figures/transfer_dql_4train_10oneshot.png)
+![dql_4train_20oneshot](figures/transfer_dql_4train_20oneshot.png)
+![dql_10train_20oneshot](figures/transfer_dql_10train_20oneshot.png)
+
 #### 4.2.2 Deep Recurrent Q-Learning
 
 ```bash
 ./notebooks/run_transfer_drql.sh python3
 ```
+
+![dqrl_4train_10oneshot](figures/transfer_dqrl_4train_10oneshot.png)
+![dqrl_4train_20oneshot](figures/transfer_dqrl_4train_20oneshot.png)
+![dqrl_10train_20oneshot](figures/transfer_dqrl_10train_20oneshot.png)
 
 ### 4.3. Toy CTF
 
@@ -92,7 +100,7 @@ Toy CTF Answer
 ./notebooks/run_toyctf_solved.sh python3
 ```
 
-![toy_ctf_answer](figures/toy_ctf_solved.gif)
+![toy_ctf_solved](figures/toy_ctf_solved.gif)
 
 #### 4.3.1. Random
 
@@ -100,17 +108,23 @@ Toy CTF Answer
 ./notebooks/run_toyctf_random.sh python3
 ```
 
+![toy_ctf_random](figures/toy_ctf_random.gif)
+
 #### 4.3.2. Rule-Based
 
 ```bash
 ./notebooks/run_toyctf_rulebased.sh python3
 ```
 
+![toy_ctf_rulebased](figures/toy_ctf_rulebased.gif)
+
 #### 4.3.3. Tabular Q learning
 
 ```bash
 ./notebooks/run_toyctf_tabularq.sh python3
 ```
+
+![toy_ctf_tabularq](figures/toy_ctf_tabularq.gif)
 
 #### 4.3.4. Deep Q-Learning
 
