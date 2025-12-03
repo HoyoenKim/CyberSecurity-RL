@@ -41,7 +41,7 @@ mkdir $output_plot_dir -p
 
 # run notebook_dql_debug.py ''
 
-
+: << 'COMMENT'
 run toyctf-blank ''
 
 run toyctf-random ''
@@ -55,10 +55,11 @@ run chainnetwork-random '' -y "
 "
 
 run randomnetwork ''
+COMMENT
 
 run notebook_benchmark '-chain' -y "
     gymid: 'CyberBattleChain-v0'
-    iteration_count: 2000           # iteration_count = 9000
+    iteration_count: 500           # iteration_count = 9000
     training_episode_count: 20      # training_episode_count = 50
     eval_episode_count: 3           # eval_episode_count = 5
     maximum_node_count: 20          # maximum_node_count = 22
@@ -70,14 +71,14 @@ run notebook_benchmark '-chain' -y "
 run notebook_benchmark '-toyctf' -y "
     gymid: 'CyberBattleToyCtf-v0'
     env_size: null
-    iteration_count: 1500
+    iteration_count: 500
     training_episode_count: 20
     eval_episode_count: 10
     maximum_node_count: 12
     maximum_total_credentials: 10
     plots_dir: $output_plot_dir
 "
-
+: << 'COMMENT'
 run notebook_benchmark '-tiny' -y "
     gymid: 'CyberBattleTiny-v0'
     env_size: null
@@ -88,6 +89,7 @@ run notebook_benchmark '-tiny' -y "
     maximum_total_credentials: 3
     plots_dir: $output_plot_dir
 "
+
 
 run notebook_dql_transfer '' -y "
     plots_dir: $output_plot_dir
@@ -108,5 +110,6 @@ run notebook_withdefender '' -y "
 run dql_active_directory '' -y "
   iteration_count: 50
 "
+COMMENT
 
 popd

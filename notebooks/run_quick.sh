@@ -31,6 +31,7 @@ mkdir $output_plot_dir -p
 
 # run  random_active_directory '' # disabled: not deterministic and can fail
 
+: << 'COMMENT'
 run toyctf-blank ''
 
 run toyctf-random ''
@@ -43,6 +44,7 @@ run chainnetwork-random '' -y "
     iterations: 100
 "
 run randomnetwork ''
+COMMENT
 
 run notebook_benchmark '-chain' -y "
     gymid: 'CyberBattleChain-v0'
@@ -65,6 +67,8 @@ run notebook_benchmark '-toyctf' -y "
     plots_dir: $output_plot_dir
 "
 
+
+: << 'COMMENT'
 run notebook_benchmark '-tiny' -y "
     gymid: 'CyberBattleTiny-v0'
     env_size: null
@@ -107,5 +111,6 @@ run dql_active_directory '' -y "
     ngyms: 3
     iteration_count: 50
 "
+COMMENT
 
 popd

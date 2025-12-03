@@ -41,6 +41,7 @@ import cyberbattle.agents.baseline.agent_wrapper as w
 import cyberbattle.agents.baseline.agent_randomcredlookup as rca
 import cyberbattle.agents.baseline.agent_tabularqlearning as tqa
 import cyberbattle.agents.baseline.agent_dql as dqla
+import cyberbattle.agents.baseline.agent_drqn as drqn
 from cyberbattle.agents.baseline.agent_wrapper import Verbosity
 from cyberbattle._env.cyberbattle_env import CyberBattleEnv
 
@@ -95,10 +96,11 @@ if debugging:
     a = w.StateAugmentation(o0)
     w.Feature_discovered_ports(ep).get(a)
     fe_example.encode_at(a, 0)
-
+'''
 # %% {"tags": []}
 # Evaluate a random agent that opportunistically exploits
 # credentials gathere in its local cache
+
 credlookup_run = learner.epsilon_greedy_search(
     gym_env,
     ep,
@@ -110,6 +112,7 @@ credlookup_run = learner.epsilon_greedy_search(
     epsilon_exponential_decay=10000,
     epsilon_minimum=0.10,
     verbosity=Verbosity.Quiet,
+    render_last_episode_rewards_to=os.path.join(plots_dir, f"credlookup-{gymid}"),
     title="Credential lookups (ϵ-greedy)",
 )
 
@@ -141,6 +144,7 @@ tabularq_exploit_run = learner.epsilon_greedy_search(
     epsilon=0.0,
     render=False,
     verbosity=Verbosity.Quiet,
+    render_last_episode_rewards_to=os.path.join(plots_dir, f"tabularq-{gymid}"),
     title="Exploiting Q-matrix",
 )
 
@@ -183,9 +187,52 @@ dql_exploit_run = learner.epsilon_greedy_search(
     render=False,
     plot_episodes_length=False,
     verbosity=Verbosity.Quiet,
+    render_last_episode_rewards_to=os.path.join(plots_dir, f"dql-{gymid}"),
     title="Exploiting DQL",
 )
+'''
 
+# %% {"tags": []}
+# Evaluate the Deep Recurrent Q-learning agent (DRQN)
+drqn_run = learner.epsilon_greedy_search(
+    cyberbattle_gym_env=gym_env,
+    environment_properties=ep,
+    learner=drqn.DeepQLearnerPolicy(
+        ep=ep,
+        gamma=0.015,
+        replay_memory_size=10000,
+        target_update=10,
+        batch_size=512,
+        learning_rate=0.01,
+        seq_len=1,
+    ),
+    episode_count=training_episode_count,
+    iteration_count=iteration_count,
+    epsilon=0.90,
+    epsilon_exponential_decay=15000,
+    epsilon_minimum=0.05,
+    verbosity=Verbosity.Quiet,
+    render=False,
+    plot_episodes_length=False,
+    title="DRQN",
+)
+
+# %% {"tags": []}
+# Evaluate an agent that exploits the DRQN policy learnt above
+drqn_exploit_run = learner.epsilon_greedy_search(
+    gym_env,
+    ep,
+    learner=drqn_run["learner"],
+    episode_count=eval_episode_count,
+    iteration_count=iteration_count,
+    epsilon=0.0,
+    epsilon_minimum=0.00,
+    render=False,
+    plot_episodes_length=False,
+    verbosity=Verbosity.Quiet,
+    render_last_episode_rewards_to=os.path.join(plots_dir, f"dqrn-{gymid}"),
+    title="Exploiting DRQN",
+)
 
 # %% {"tags": []}
 # Evaluate the random agent
@@ -199,30 +246,44 @@ random_run = learner.epsilon_greedy_search(
     render=False,
     verbosity=Verbosity.Quiet,
     plot_episodes_length=False,
+    render_last_episode_rewards_to=os.path.join(plots_dir, f"random-{gymid}"),
     title="Random search",
 )
 
 # %% {"tags": []}
 # Compare and plot results for all the agents
-all_runs = [random_run, credlookup_run, tabularq_run, tabularq_exploit_run, dql_run, dql_exploit_run]
+all_runs = [
+    #random_run,
+    #credlookup_run,
+    #tabularq_run,
+    #tabularq_exploit_run,
+    #dql_run,
+    #dql_exploit_run,
+    drqn_run,
+    drqn_exploit_run,
+]
 
 # Plot averaged cumulative rewards for DQL vs Random vs DQL-Exploit
 themodel = dqla.CyberBattleStateActionModel(ep)
 p.plot_averaged_cummulative_rewards(
     all_runs=all_runs,
-    title=f"Benchmark -- max_nodes={ep.maximum_node_count}, episodes={eval_episode_count},\n"
-    f"State: {[f.name() for f in themodel.state_space.feature_selection]} "
-    f"({len(themodel.state_space.feature_selection)}\n"
-    f"Action: abstract_action ({themodel.action_space.flat_size()})",
+    title=(
+        f"Benchmark -- max_nodes={ep.maximum_node_count}, episodes={eval_episode_count}\n"
+        f"State: {[f.name() for f in themodel.state_space.feature_selection]} "
+        f"({len(themodel.state_space.feature_selection)})\n"
+        f"Action: abstract_action ({themodel.action_space.flat_size()})"
+    ),
     save_at=os.path.join(plots_dir, f"benchmark-{gymid}-cumrewards.png"),
 )
 
 # %% {"tags": []}
-contenders = [credlookup_run, tabularq_run, dql_run, dql_exploit_run]
+contenders = [drqn_run, drqn_exploit_run] # [credlookup_run, tabularq_run, dql_run, dql_exploit_run, drqn_run, drqn_exploit_run]
 p.plot_episodes_length(contenders)
-p.plot_averaged_cummulative_rewards(title=f"Agent Benchmark top contenders\n" f"max_nodes:{ep.maximum_node_count}\n", all_runs=contenders,
-                                    save_at=os.path.join(plots_dir, f"benchmark-{gymid}-cumreward_contenders.png"))
-
+p.plot_averaged_cummulative_rewards(
+    title=f"Agent Benchmark top contenders\nmax_nodes:{ep.maximum_node_count}\n",
+    all_runs=contenders,
+    save_at=os.path.join(plots_dir, f"benchmark-{gymid}-cumreward_contenders.png"),
+)
 
 # %% {"tags": []}
 # Plot cumulative rewards for all episodes
