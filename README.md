@@ -26,14 +26,18 @@ To activate the environment run:
 conda activate cybersim
 ```
 
-## 4. Run & Result
+## 4. Run & Results
+
+Running results are saved at /notebooks/output
+Exploit step images are genearated. (Not gif)
+
 ### 4.1. Baseline
 #### 4.1.1. Random
 
 ```bash
 ./notebooks/run_baseline_random.sh python3
 ```
-![baseline_random] (figures/baseline_random.gif)
+![baseline_random](figures/baseline_random.gif)
 
 #### 4.1.2. Rule-Based
 
@@ -41,11 +45,15 @@ conda activate cybersim
 ./notebooks/run_baseline_rulebased.sh python3
 ```
 
+![baseline_rulebased](figures/baseline_rulebased.gif)
+
 #### 4.1.3. Tabular Q-Learning
 
 ```bash
 ./notebooks/run_baseline_tabularq.sh python3
 ```
+
+![baseline_tabularq](figures/baseline_tabularq.gif)
 
 #### 4.1.4. Deep Q-Learning
 
@@ -53,11 +61,15 @@ conda activate cybersim
 ./notebooks/run_baseline_dql.sh python3
 ```
 
+![baseline_dql](figures/baseline_dql.gif)
+
 #### 4.1.5. Deep Recurrent Q-Learning
 
 ```bash
 ./notebooks/run_baseline_drql.sh python3
 ```
+
+![baseline_dqrl](figures/baseline_dqrl.gif)
 
 ### 4.2. Transfer Learning:
 
@@ -79,6 +91,8 @@ Toy CTF Answer
 ```bash
 ./notebooks/run_toyctf_solved.sh python3
 ```
+
+![toy_ctf_answer](figures/toy_ctf_solved.gif)
 
 #### 4.3.1. Random
 
