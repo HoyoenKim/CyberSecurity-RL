@@ -33,6 +33,7 @@ conda activate cybersim
 ```bash
 ./notebooks/run_baseline_random.sh python3
 ```
+![baseline_random] (figures/baseline_random.gif)
 
 #### 4.1.2. Rule-Based
 
