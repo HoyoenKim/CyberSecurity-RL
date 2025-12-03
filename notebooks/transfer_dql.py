@@ -13,22 +13,7 @@
 #     language: python
 #     name: python3
 # ---
-
-# %%
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
-
 # -*- coding: utf-8 -*-
-# %%
-"""Notebook demonstrating transfer learning capability of the
-the Deep Q-learning agent trained and evaluated on the chain
- environment of various sizes.
-
-NOTE: You can run this `.py`-notebook directly from VSCode.
-You can also generate a traditional Jupyter Notebook
-using the VSCode command `Export Currenty Python File As Jupyter Notebook`.
-"""
-
 # %%
 import os
 import sys
@@ -54,14 +39,38 @@ logging.basicConfig(stream=sys.stdout, level=logging.ERROR, format="%(levelname)
 
 # %matplotlib inline
 
+# %% {"tags": []}
+plots_dir = "notebooks/output/transfer_dql/plots"
+plot_prefix = "transfer_dql"
+
+from pathlib import Path
+import matplotlib.pyplot as plt
+
+PLOTS_DIR = Path(plots_dir)
+PLOTS_DIR.mkdir(parents=True, exist_ok=True)
+
+_plot_idx = 0
+def _next_name(name=None):
+    global _plot_idx
+    _plot_idx += 1
+    return name or f"{plot_prefix}-{_plot_idx:03d}"
+
+def save_png_mpl(fig=None, name=None):
+    out = PLOTS_DIR / f"{_next_name(name)}.png"
+    f = fig if fig is not None else plt.gcf()
+    f.savefig(out, dpi=200, bbox_inches="tight")
+
+_orig_plt_show = plt.show
+def _plt_show(*args, **kwargs):
+    save_png_mpl(plt.gcf())
+    ret = _orig_plt_show(*args, **kwargs)
+    return ret
+
+plt.show = _plt_show
+
 # %%
 torch.cuda.is_available()
 
-# %%
-# To run once
-# import plotly.io as pio
-# pio.orca.config.use_xvfb = True
-# pio.orca.config.save()
 # %%
 cyberbattlechain_4 = gym.make("CyberBattleChain-v0", size=4, attacker_goal=cyberbattle_env.AttackerGoal(own_atleast_percent=1.0)).unwrapped
 cyberbattlechain_10 = gym.make("CyberBattleChain-v0", size=10, attacker_goal=cyberbattle_env.AttackerGoal(own_atleast_percent=1.0)).unwrapped
