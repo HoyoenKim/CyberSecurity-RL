@@ -42,8 +42,8 @@ logging.basicConfig(stream=sys.stdout, level=logging.ERROR, format="%(levelname)
 # %matplotlib inline
 
 # %% {"tags": []}
-plots_dir = "notebooks/output/transfer_dql/plots"
-plot_prefix = "transfer_dql"
+plots_dir = "notebooks/output/transfer_drql/plots"
+plot_prefix = "transfer_drql"
 
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -127,11 +127,11 @@ best_drqn_learning_run_10 = learner.epsilon_greedy_search(
     episode_count=training_episode_count,
     iteration_count=iteration_count,
     epsilon=0.90,
-    render=False,
-    # epsilon_multdecay=0.75,  # 0.999,
-    epsilon_exponential_decay=5000,  # 10000
-    epsilon_minimum=0.10,
+    epsilon_exponential_decay=15000,
+    epsilon_minimum=0.05,
     verbosity=Verbosity.Quiet,
+    render=False,
+    plot_episodes_length=False,
     title="DRQN",
 )
 
@@ -154,7 +154,7 @@ drqn_exploit_run = learner.epsilon_greedy_search(
     iteration_count=iteration_count,
     epsilon=0.0,  # exploit only
     render=False,
-    render_last_episode_rewards_to=os.path.join(plots_dir, "drqn_transfer-chain10"),
+    render_last_episode_rewards_to=os.path.join(plots_dir, "drql_transfer-chain10"),
     title="Exploiting DRQN",
     verbosity=Verbosity.Quiet,
 )
@@ -202,18 +202,19 @@ best_drqn_4 = learner.epsilon_greedy_search(
         ep=ep,
         gamma=0.015,
         replay_memory_size=10000,
-        target_update=10,
-        batch_size=512,
+        target_update=5,
+        batch_size=256,
         learning_rate=0.01,
         seq_len=1,
     ),
     episode_count=training_episode_count,
     iteration_count=iteration_count,
     epsilon=0.90,
-    render=False,
-    epsilon_exponential_decay=5000,
-    epsilon_minimum=0.10,
+    epsilon_exponential_decay=15000,
+    epsilon_minimum=0.05,
     verbosity=Verbosity.Quiet,
+    render=False,
+    plot_episodes_length=False,
     title="DRQN (size=4)",
 )
 
