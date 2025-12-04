@@ -29,9 +29,9 @@ mkdir $output_plot_dir -p
 run toyctf_random '-toyctf' -y "
     gymid: 'CyberBattleToyCtf-v0'
     env_size: null
-    iteration_count: 1500
-    training_episode_count: 20
-    eval_episode_count: 10
+    iteration_count: 100
+    training_episode_count: 3
+    eval_episode_count: 5
     maximum_node_count: 12
     maximum_total_credentials: 10
     plots_dir: $output_plot_dir

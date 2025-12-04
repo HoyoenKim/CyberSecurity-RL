@@ -36,7 +36,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.ERROR, format="%(levelname)
 # %matplotlib inline
 # %% {"tags": ["parameters"]}
 # Papermill notebook parameters
-gymid = "CyberBattleChain-v0"
+gymid = "CyberBattleToyCtf-v0"
 env_size = 10
 iteration_count = 9000
 training_episode_count = 50
