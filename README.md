@@ -272,8 +272,6 @@ Introduce a defender and measure robustness / performance degradation of attacke
 | Deep Q-Learning (DQN) | 11 / 11 | 11 / 11 |
 | Deep Recurrent Q-Learning (DRQN) | 11 / 11 | 11 / 11 |
 
----
-
 In the Chain network, both DQN and DRQN achieve perfect final coverage (11/11) for discovery and exploitation. This suggests that
 - (1) the environment is relatively simple,
 - (2) the observation design provides sufficient information for planning,
@@ -297,8 +295,6 @@ As a result, DRQN tends to execute a broader and more consistent sequence of rem
 | 4 | 20 | Success |
 | 10 | 20 | Success |
 
----
-
 DQN transfers successfully across all tested settings, which implies that the learned policy scales with environment size (at least for the tested Chain family) and that the learned features correlate with generalizable attack progress (e.g., privilege level, reachable services, credential discovery patterns).
 
 **Deep Recurrent Q-Learning (DRQN)**
@@ -308,8 +304,6 @@ DQN transfers successfully across all tested settings, which implies that the le
 | 4 | 10 | Success |
 | 4 | 20 | Fail |
 | 10 | 20 | Success |
-
----
 
 In contrast, DRQN shows an unstable transfer outcome (Fail on 4→20 but Success on 10→20). This failure pattern is often consistent with training instability in recurrent off-policy RL, rather than indicating a fundamental limitation of recurrence itself.
 
@@ -333,8 +327,6 @@ Training on a moderately larger setting (size 10) increases trajectory diversity
 | Tabular Q-Learning | 5 / 9 | 1 / 5 |
 | Deep Q-Learning (DQN) | 9 / 9 | 5 / 5 |
 | Deep Recurrent Q-Learning (DRQN) | 9 / 9 | 5 / 5 |
-
----
 
 In the Toy CTF environment, both DQN and DRQN achieve full success (9/9 discovery and 5/5 exploitation), but DRQN can reach “exploit all nodes” faster because Toy CTF more strongly reflects partial observability and delayed consequences than the Chain setting.
 
