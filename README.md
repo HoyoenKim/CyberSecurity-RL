@@ -101,6 +101,8 @@ conda activate cybersim
 All run artifacts (executed notebooks, logs, plots) are saved under `notebooks/output/`.
 Figures referenced below are exported under `figures/`.
 
+---
+
 ### 4.1. Experiment 1 — Baseline Attacker Training & Evaluation (Chain Network)
 Train and evaluate attacker agents on `CyberBattleChain-v0`. Each result GIF shows the evaluation phase, where the agent exploits the network.
 
@@ -143,6 +145,8 @@ Train and evaluate attacker agents on `CyberBattleChain-v0`. Each result GIF sho
 
 ![baseline_dqrl](figures/baseline_dqrl.gif)
 
+---
+
 ### 4.2. Experiment 2 — Transfer Learning Evaluation (Q-Learning on Chain)
 Evaluate how well a policy trained on a smaller Chain generalizes to larger Chains.
 - Train on: Chain-{N_train}
@@ -177,6 +181,8 @@ Evaluate how well a policy trained on a smaller Chain generalizes to larger Chai
 
 - Train on 10 chain and Evaulate on 20 chain
 ![dqrl_10train_20oneshot](figures/transfer_drql_10train_20oneshot.png)
+
+---
 
 ### 4.3. Experiment 3 — Toy CTF Evaluation (Attacker Agents)
 Evaluate attacker agents on `CyberBattleToyCtf-v0`. A reference/solution-style run to validate the environment and expected path.
@@ -227,6 +233,8 @@ Evaluate attacker agents on `CyberBattleToyCtf-v0`. A reference/solution-style r
 ```
 
 ![toy_ctf_drql](figures/toy_ctf_drql.gif)
+
+---
 
 ### 4.4. Experiment 4 — Adding a Defender (Blue Team) and Re-evaluating
 Introduce a defender and measure robustness / performance degradation of attacker agents.
