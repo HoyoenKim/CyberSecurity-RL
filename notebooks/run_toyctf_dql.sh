@@ -29,7 +29,7 @@ mkdir $output_plot_dir -p
 run toyctf_dql '-toyctf' -y "
     gymid: 'CyberBattleToyCtf-v0'
     env_size: null
-    iteration_count: 200
+    iteration_count: 500
     training_episode_count: 20
     eval_episode_count: 10
     maximum_node_count: 12
