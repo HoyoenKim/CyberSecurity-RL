@@ -10,7 +10,7 @@ script_dir=$(dirname "$0")
 
 pushd "$script_dir/.."
 
-output_dir=notebooks/toyctf_drqn
+output_dir=notebooks/output/toyctf_drql
 output_plot_dir=$output_dir/plots
 
 run () {
@@ -26,10 +26,10 @@ jupyter kernelspec list
 mkdir $output_dir -p
 mkdir $output_plot_dir -p
 
-run toyctf_drqn '-toyctf' -y "
+run toyctf_drql '-toyctf' -y "
     gymid: 'CyberBattleToyCtf-v0'
     env_size: null
-    iteration_count: 200
+    iteration_count: 500
     training_episode_count: 20
     eval_episode_count: 10
     maximum_node_count: 12
