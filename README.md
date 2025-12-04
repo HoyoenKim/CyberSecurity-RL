@@ -89,9 +89,9 @@ Exploit step images are genearated. (Not gif)
 ./notebooks/run_transfer_drql.sh python3
 ```
 
-![dqrl_4train_10oneshot](figures/transfer_dqrl_4train_10oneshot.png)
-![dqrl_4train_20oneshot](figures/transfer_dqrl_4train_20oneshot.png)
-![dqrl_10train_20oneshot](figures/transfer_dqrl_10train_20oneshot.png)
+![dqrl_4train_10oneshot](figures/transfer_drql_4train_10oneshot.png)
+![dqrl_4train_20oneshot](figures/transfer_drql_4train_20oneshot.png)
+![dqrl_10train_20oneshot](figures/transfer_drql_10train_20oneshot.png)
 
 ### 4.3. Toy CTF
 
@@ -132,11 +132,15 @@ Toy CTF Answer
 ./notebooks/run_toyctf_dql.sh python3
 ```
 
+![toy_ctf_dql](figures/toy_ctf_dql.gif)
+
 #### 4.3.5. Deep Recurrent Q-Learning
 
 ```bash
 ./notebooks/run_toyctf_drql.sh python3
 ```
+
+![toy_ctf_drql](figures/toy_ctf_drql.gif)
 
 ### 4.4. Add Defender
 #### 4.4.1. Tabular Q Learning
