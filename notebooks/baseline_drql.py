@@ -135,7 +135,7 @@ drqn_exploit_run = learner.epsilon_greedy_search(
     render=False,
     plot_episodes_length=False,
     verbosity=Verbosity.Quiet,
-    render_last_episode_rewards_to=os.path.join(plots_dir, f"dqrn-{gymid}"),
+    render_last_episode_rewards_to=os.path.join(plots_dir, f"dqrl-{gymid}"),
     title="Exploiting DRQN",
 )
 
