@@ -56,6 +56,3 @@ cyberbattle.code-workspace
 typings/**
 
 log.txt
-
-notebooks/output/**
-notebooks/images/**

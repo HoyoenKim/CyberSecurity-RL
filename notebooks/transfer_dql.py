@@ -86,7 +86,7 @@ ep = w.EnvironmentBounds.of_identifiers(maximum_total_credentials=22, maximum_no
 iteration_count = 9000
 training_episode_count = 50
 eval_episode_count = 10
-plots_dir = "output/images"
+plots_dir = "output/plots"
 
 # %%
 os.makedirs(plots_dir, exist_ok=True)
@@ -115,9 +115,6 @@ p.plot_episodes_length([best_dqn_learning_run_10])
 
 # %% [markdown]
 
-# %%
-if not os.path.exists("images"):
-    os.mkdir("images")
 
 # %%
 dql_exploit_run = learner.epsilon_greedy_search(

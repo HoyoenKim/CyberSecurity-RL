@@ -104,7 +104,7 @@ ep = w.EnvironmentBounds.of_identifiers(
 iteration_count = 9000
 training_episode_count = 50
 eval_episode_count = 10
-plots_dir = "output/images"
+plots_dir = "output/plots"
 
 # %%
 os.makedirs(plots_dir, exist_ok=True)
@@ -139,9 +139,6 @@ best_drqn_learning_run_10 = learner.epsilon_greedy_search(
 # Plot episode length (DRQN)
 p.plot_episodes_length([best_drqn_learning_run_10])
 
-# %%
-if not os.path.exists("images"):
-    os.mkdir("images")
 
 # %% ---------------------------------------------------------
 # Exploit policy learned by DRQN (no exploration, epsilon=0)
