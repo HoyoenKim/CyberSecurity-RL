@@ -354,25 +354,36 @@ As a result, DRQN tends to converge to more consistent attack sequences (scan �
 | Deep Q-Learning (DQN) | 11 / 11 | 7 / 11 |
 | Deep Recurrent Q-Learning (DRQN) | 11 / 11 | 11 / 11 |
 
+In the Defender setting, the environment becomes non-stationary and stochastic: periodically scanning and detection can interrupt long attack chains, invalidate previously reliable pivots, and force the attacker to recover from partial progress. As a result, “discovering all nodes” and “successfully exploiting all nodes” become separable objectives.
+
+DQN still achieves 11/11 discovery, indicating it can learn an effective exploration policy even under defense pressure. However, its exploitation drops to 7/11, which is consistent with a feed-forward policy struggling to maintain persistent control when the defender intermittently disrupts the attacker’s foothold. In practice, exploitation in a defended network often requires multi-step sequences (remote exploit → pivot → privilege escalation) that must be completed before detection events break the chain.
+
+In contrast, DRQN retains 11/11 exploitation, suggesting that recurrence helps the attacker remain robust to interruptions by encoding short-term temporal context such as:
+- which nodes were recently “lost” (likely reimaged or access revoked),
+- which exploit attempts just failed due to defense actions,
+- which pivots remain viable given the most recent outcomes.
+
+This allows DRQN to quickly switch into a “recover → re-pivot → re-escalate” mode instead of repeatedly committing to broken sequences. Meanwhile, Rule-Based degrades (4/11 found, 3/11 exploited) because fixed heuristics tend to follow predictable action patterns and cannot adapt to defender-induced resets, leading to repeated scans and incomplete exploitation chains.
+
 ---
 
 ### 5.2. Future Work
 
-1) **Move to continuous-time / continuous-control settings**
+#### 1. **Move to continuous-time / continuous-control settings**
+Future work: implement a red-team agent in a continuous (or hybrid) environment.
+
+In a discrete action space as cyberbattlesim, increasing the number of vulnerabilities rapidly increases the action combinations, making training difficult. In addition, ToyCTF does not fully reflect real-world attacks. In practice, many known attacks are documented in the NVD as CVEs, and there are too many to model as separate discrete actions. A CVE-based attack catalog can be used, but it should be integrated in a scalable way (e.g., via continuous or hybrid parameterization) rather than enumerating every CVE as an individual action.
+
 Policies should be evaluated in a continuous or event-driven environment (e.g., C-CyberBattleSim-style) that models action duration, delayed effects, and risk accumulation over time. This enables optimizing **time-to-compromise**, **cumulative detection risk**, and **operational cost**, and supports algorithms such as PPO/SAC/TD3. (Refer /notebooks/stable-baselines-agent.py)
 
-2) **Attacker–defender co-evolution (multi-agent learning)**
+#### 2. **Attacker–defender co-evolution (multi-agent learning)**
 An active defender (isolation, reimaging, patching, deception) should be introduced to measure attacker performance under defense pressure. Joint training/self-play can then be explored to improve robustness against adaptive opponents.
 
-3) **Hierarchical decision-making**
+#### 3. **Hierarchical decision-making**
 The task can be decomposed into high-level planning (stage/target selection) and low-level execution (scan/exploit/credential use). This structure is expected to improve transfer to new network structures and make strategies easier to interpret.
 
-4) **More realistic observations + memory models**
+#### 4. **More realistic observations + memory models**
 Observations should be shifted toward operational signals (logs/alerts/scan records), and recurrent or Transformer-based history encoders should be evaluated under partial observability. The goal is to reduce redundant actions and accelerate pivots.
 
-5) **Generalization across topology changes**
+#### 5. **Generalization across topology changes**
 Beyond size scaling, training and evaluation should vary topology, services, vulnerability placement, and credential distribution, and then test on unseen structures.
-
-6) **Security-oriented objectives and reporting**
-Stealth/cost-aware rewards and reporting should be added, including success-rate, steps/time-to-goal, and d
-::contentReference[oaicite:0]{index=0}
