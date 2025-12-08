@@ -67,6 +67,38 @@ To activate the environment run:
 conda activate cybersim
 ```
 
+### 3.2. Troubleshooting
+
+#### Missing `jupytext` / `papermill`
+
+If you see:
+
+```bash
+jupytext: command not found
+papermill: command not found
+```
+
+Install both packages via conda-forge:
+
+```bash
+conda install -c conda-forge jupytext papermill -y
+```
+
+#### Missing Jupyter kernel (python3)
+
+If you see:
+
+```bash
+jupyter_client.kernelspec.NoSuchKernel: No such kernel named python3
+```
+
+Install the Jupyter kernel dependencies and register the kernel:
+
+```bash
+conda install -c conda-forge -y ipykernel jupyter jupyter_client
+python -m ipykernel install --user --name python3 --display-name "Python 3 (cybersimllm)"
+```
+
 ### 3.2. Repository Structure
 
 ```text
