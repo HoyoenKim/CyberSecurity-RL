@@ -1,6 +1,6 @@
 ﻿# Cybersecurity Red-Team Agent with Deep Reinforcement Learning
 This project implements cybersecurity red-team (attacker) RL agents in Microsoft’s **CyberBattleSim** environment.
-CyberBattleSim: https://github.com/microsoft/CyberBattleSim
+- CyberBattleSim: https://github.com/microsoft/CyberBattleSim
 
 Additional project documentation is available in `/doc`.
 
