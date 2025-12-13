@@ -99,7 +99,7 @@ conda install -c conda-forge -y ipykernel jupyter jupyter_client
 python -m ipykernel install --user --name python3 --display-name "Python 3 (cybersimllm)"
 ```
 
-### 3.2. Repository Structure
+### 3.3. Repository Structure
 
 ```text
 .
