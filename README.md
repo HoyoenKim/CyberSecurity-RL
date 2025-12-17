@@ -419,3 +419,19 @@ Observations should be shifted toward operational signals (logs/alerts/scan reco
 
 #### 5. **Generalization across topology changes**
 Beyond size scaling, training and evaluation should vary topology, services, vulnerability placement, and credential distribution, and then test on unseen structures.
+
+#### 6. **Game-Theoretic Training**
+The attacker and defender could be **trained jointly** in an adversarial (game-theoretic) framework rather than optimizing each side in isolation.
+
+One natural direction is **self-play multi-agent RL**, where the attacker’s policy learns to maximize impact (e.g., privilege gain, lateral movement, exfiltration) while the defender’s policy learns to minimize damage under constraints (e.g., detection latency, false positives, patching cost, service availability).
+
+This can be formulated as a **two-player zero-sum Markov game** (minimax objective), or more realistically as a **general-sum / Stackelberg game** where the defender commits to a strategy (hardening + monitoring) and the attacker best-responds, reflecting real-world asymmetry and differing cost structures.
+
+Practically, joint training could use
+- (i) **alternating updates** (freeze defender, train attacker; then freeze attacker, train defender).
+- (ii) **population-based training** to avoid overfitting to a single opponent.
+- (iii) **robust RL** objectives that optimize against a set of attacker behaviors (or vice versa).
+
+Key research challenges include **non-stationarity** (the environment changes as the opponent learns), **reward shaping** to prevent degenerate equilibria (e.g., defender “turning everything off”), and **partial observability** (defender sees alerts/telemetry, attacker sees only local host/network state).
+
+Evaluation should report not just average reward, but **exploit–detect tradeoffs**, **equilibrium/robustness metrics** (performance against held-out opponent populations), and **transfer** to unseen network topologies or vulnerability sets.
