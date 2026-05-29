@@ -172,42 +172,60 @@ class EpisodeReplayMemory:
         return self.num_steps
 
     def sample(self, batch_size: int):
-        eligible_episodes = [ep for ep in self.episodes if len(ep) >= self.seq_len]
-
-        # ✅ 진행 중 에피소드도 길이가 충분하면 샘플 후보에 포함
-        if len(self.current_episode) >= self.seq_len:
+        # 길이가 1 이상인 모든 에피소드를 후보로 삼고, seq_len보다 짧은 에피소드는
+        # 패딩 + 마스크로 포함한다.
+        # (이전 구현은 len(ep) >= seq_len 인 에피소드만 후보로 두어, seq_len을 키우고
+        #  에피소드가 짧으면 sample()이 ValueError를 던지고 optimize_model이 이를 조용히
+        #  삼켜 '학습이 한 번도 일어나지 않는' 함정이 있었다.)
+        eligible_episodes = [ep for ep in self.episodes if len(ep) > 0]
+        if len(self.current_episode) > 0:
             eligible_episodes.append(self.current_episode)
 
         if not eligible_episodes:
-            raise ValueError("Not enough episodes with length >= seq_len to sample from.")
+            raise ValueError("No transitions available to sample from.")
 
         batch_episodes = random.choices(eligible_episodes, k=batch_size)
+        state_dim = batch_episodes[0][0].state.shape[-1]
 
-        state_seqs, action_seqs, reward_seqs, next_state_seqs, done_seqs = [], [], [], [], []
+        state_seqs, action_seqs, reward_seqs, next_state_seqs, done_seqs, mask_seqs = [], [], [], [], [], []
         for ep in batch_episodes:
-            max_start = len(ep) - self.seq_len
-            start_idx = random.randint(0, max_start)
-            window = ep[start_idx : start_idx + self.seq_len]
+            ep_len = len(ep)
+            eff_len = min(self.seq_len, ep_len)            # 에피소드가 짧으면 가능한 만큼만 사용
+            start_idx = random.randint(0, ep_len - eff_len)
+            window = ep[start_idx : start_idx + eff_len]
 
-            s_seq  = torch.cat([tr.state for tr in window], dim=0)       # [T, D]
-            a_seq  = torch.cat([tr.action for tr in window], dim=0)      # [T, 1]
-            r_seq  = torch.cat([tr.reward for tr in window], dim=0)      # [T]
-            ns_seq = torch.cat([tr.next_state for tr in window], dim=0)  # [T, D]
-            d_seq  = torch.cat([tr.done for tr in window], dim=0)        # [T]
+            s_seq  = torch.cat([tr.state for tr in window], dim=0)       # [eff, D]
+            a_seq  = torch.cat([tr.action for tr in window], dim=0)      # [eff, 1]
+            r_seq  = torch.cat([tr.reward for tr in window], dim=0)      # [eff]
+            ns_seq = torch.cat([tr.next_state for tr in window], dim=0)  # [eff, D]
+            d_seq  = torch.cat([tr.done for tr in window], dim=0)        # [eff]
+            m_seq  = torch.ones(eff_len, device=s_seq.device)            # [eff] 유효 step = 1
+
+            pad = self.seq_len - eff_len
+            if pad > 0:
+                dev = s_seq.device
+                s_seq  = torch.cat([s_seq,  torch.zeros(pad, state_dim, device=dev)], dim=0)
+                a_seq  = torch.cat([a_seq,  torch.zeros(pad, 1, dtype=a_seq.dtype, device=dev)], dim=0)
+                r_seq  = torch.cat([r_seq,  torch.zeros(pad, device=dev)], dim=0)
+                ns_seq = torch.cat([ns_seq, torch.zeros(pad, state_dim, device=dev)], dim=0)
+                d_seq  = torch.cat([d_seq,  torch.ones(pad, device=dev)], dim=0)   # 패딩 step은 done=1 (bootstrap 차단)
+                m_seq  = torch.cat([m_seq,  torch.zeros(pad, device=dev)], dim=0)  # 패딩 step은 loss에서 제외
 
             state_seqs.append(s_seq)
             action_seqs.append(a_seq)
             reward_seqs.append(r_seq)
             next_state_seqs.append(ns_seq)
             done_seqs.append(d_seq)
+            mask_seqs.append(m_seq)
 
         state_batch      = torch.stack(state_seqs, dim=0).to(device)       # [B, T, D]
         action_batch     = torch.stack(action_seqs, dim=0).to(device)      # [B, T, 1]
         reward_batch     = torch.stack(reward_seqs, dim=0).to(device)      # [B, T]
         next_state_batch = torch.stack(next_state_seqs, dim=0).to(device)  # [B, T, D]
         done_batch       = torch.stack(done_seqs, dim=0).to(device)        # [B, T]
+        mask_batch       = torch.stack(mask_seqs, dim=0).to(device)        # [B, T]
 
-        return state_batch, action_batch, reward_batch, next_state_batch, done_batch
+        return state_batch, action_batch, reward_batch, next_state_batch, done_batch, mask_batch
 
 
 # =====================================================================
@@ -394,6 +412,7 @@ class DeepQLearnerPolicy(Learner):
                 reward_batch,     # [B, T]
                 next_state_batch, # [B, T, state_dim]
                 done_batch,       # [B, T]
+                mask_batch,       # [B, T]  유효 step=1, 패딩 step=0
             ) = self.memory.sample(self.batch_size)
         except ValueError:
             return
@@ -411,8 +430,9 @@ class DeepQLearnerPolicy(Learner):
             # y_t = r_t + γ * max_a' Q_target(s_{t+1}, a') * (1 - done)
             target = reward_batch + self.gamma * next_max_q * (1.0 - done_mask)
 
-        # Huber loss
-        loss = F.smooth_l1_loss(q_taken, target)
+        # Huber loss (패딩 step은 mask로 제외하고 유효 step 수로 평균)
+        elementwise_loss = F.smooth_l1_loss(q_taken, target, reduction="none")  # [B, T]
+        loss = (elementwise_loss * mask_batch).sum() / mask_batch.sum().clamp_min(1.0)
 
         # Optimize the model
         self.optimizer.zero_grad()
@@ -589,9 +609,18 @@ class DeepQLearnerPolicy(Learner):
                     actor_state=actor_state,
                 ),
             )
-
-        # ✅ 가짜 transition 학습 제거
-        return "exploit[undefined]->explore", None, None
+        else:
+            # 무효(undefined)한 exploit 시도를 음성 신호로 학습한다 (원본 DQL과 동일).
+            # 현재 상태에서 이 추상 액션은 reward=0이고 상태가 바뀌지 않음(self-loop)을 가르쳐
+            # Q가 유효한 액션 쪽으로 수렴하도록 한다.
+            # (이 신호 제거가 DRQN 학습 부진의 주요 원인이었음 — CLAUDE.md §7-8 참고)
+            self.update_q_function(
+                reward=0.0,
+                actor_state=actor_state,
+                next_actor_state=actor_state,
+                abstract_action=abstract_action,
+            )
+            return "exploit[undefined]->explore", None, None
 
     def exploit(self, wrapped_env, observation) -> Tuple[str, Optional[cyberbattle_env.Action], object]:
         current_global_state = self.stateaction_model.global_features.get(wrapped_env.state, node=None)

@@ -109,7 +109,7 @@ drqn_run = learner.epsilon_greedy_search(
         target_update=10,
         batch_size=512,
         learning_rate=0.01,
-        seq_len=1,
+        seq_len=8,
     ),
     episode_count=training_episode_count,
     iteration_count=iteration_count,
