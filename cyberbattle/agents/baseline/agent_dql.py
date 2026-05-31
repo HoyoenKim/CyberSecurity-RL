@@ -248,11 +248,14 @@ class DeepQLearnerPolicy(Learner):
         target_update: int,
         batch_size: int,
         learning_rate: float,
+        train_every: int = 1,
     ):
         self.stateaction_model = CyberBattleStateActionModel(ep)
         self.batch_size = batch_size
         self.gamma = gamma
         self.learning_rate = learning_rate
+        self.train_every = train_every
+        self._opt_counter = 0
 
         self.policy_net = DQN(ep).to(device)
         self.target_net = DQN(ep).to(device)
@@ -357,8 +360,10 @@ class DeepQLearnerPolicy(Learner):
             next_state_tensor = torch.as_tensor(next_actor_state, dtype=torch.float, device=device).unsqueeze(0)
         self.memory.push(current_state_tensor, action_tensor, next_state_tensor, reward_tensor)
 
-        # optimize the target network
-        self.optimize_model()
+        # optimize the target network (throttled by train_every; 1 = every step)
+        self._opt_counter += 1
+        if self._opt_counter % self.train_every == 0:
+            self.optimize_model()
 
     def on_step(
         self,

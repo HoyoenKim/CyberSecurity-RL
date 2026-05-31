@@ -322,6 +322,7 @@ class DeepQLearnerPolicy(Learner):
         learning_rate: float,
         seq_len: int = 8,          # 시퀀스 길이 (DRQN용)
         drqn_hidden_size: int = 256,
+        train_every: int = 1,
     ):
         self.stateaction_model = CyberBattleStateActionModel(ep)
         self.batch_size = batch_size
@@ -329,6 +330,8 @@ class DeepQLearnerPolicy(Learner):
         self.learning_rate = learning_rate
         self.seq_len = seq_len
         self._nets_initialized = False
+        self.train_every = train_every
+        self._opt_counter = 0
 
         # DRQN 네트워크 (policy / target)
         self.policy_net = DRQN(ep, hidden_size=drqn_hidden_size).to(device)
@@ -486,8 +489,10 @@ class DeepQLearnerPolicy(Learner):
             done_tensor,           # [1]
         )
 
-        # optimize the DRQN
-        self.optimize_model()
+        # optimize the DRQN (throttled by train_every; 1 = every step)
+        self._opt_counter += 1
+        if self._opt_counter % self.train_every == 0:
+            self.optimize_model()
 
     # =================================================================
     # 4-2. Learner 인터페이스 구현
