@@ -46,6 +46,17 @@ from cyberbattle.agents.baseline.agent_wrapper import Verbosity
 from cyberbattle._env.cyberbattle_env import CyberBattleEnv
 
 logging.basicConfig(stream=sys.stdout, level=logging.ERROR, format="%(levelname)s: %(message)s")
+
+# Reproducibility (review §7-3): fix RNG seeds so re-runs are deterministic.
+import random as _random
+import numpy as _np
+import torch as _torch
+seed = 0
+_random.seed(seed)
+_np.random.seed(seed)
+_torch.manual_seed(seed)
+if _torch.cuda.is_available():
+    _torch.cuda.manual_seed_all(seed)
 # %% {"tags": []}
 # %matplotlib inline
 # %% {"tags": ["parameters"]}
