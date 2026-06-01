@@ -33,7 +33,9 @@ def test_replay_padding_and_mask() -> None:
     for i in range(3):             # short episode (< seq_len) -> must be padded + masked
         _push(mem, i, i == 2, dim)
 
-    state, action, _reward, _next_state, done, mask = mem.sample(batch)
+    # sample() returns tensors on the agent's device (cuda if available); move to cpu so
+    # these logic assertions are device-agnostic (pass on both GPU hosts and CPU-only CI).
+    state, action, _reward, _next_state, done, mask = [t.cpu() for t in mem.sample(batch)]
     assert state.shape == (batch, seq, dim)
     assert action.shape == (batch, seq, 1)
     assert mask.shape == (batch, seq)
@@ -52,7 +54,7 @@ def test_masked_loss_grad_flows() -> None:
     mem = EpisodeReplayMemory(capacity=10000, seq_len=seq)
     for i in range(12):            # one episode, length 12 >= seq_len
         _push(mem, i, i == 11, dim)
-    state, action, reward, next_state, done, mask = mem.sample(batch)
+    state, action, reward, next_state, done, mask = [t.cpu() for t in mem.sample(batch)]
 
     net = nn.Sequential(nn.Linear(dim, 16), nn.ReLU(), nn.Linear(16, n_act))
     q = net(state).gather(2, action.long()).squeeze(2)            # [B, T]
