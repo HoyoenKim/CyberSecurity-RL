@@ -1,0 +1,212 @@
+{
+  "scenario": "chain",
+  "size": 10,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "train_every": 4,
+  "common": {
+    "gamma": 0.015,
+    "replay_memory_size": 10000,
+    "target_update": 10,
+    "batch_size": 256,
+    "learning_rate": 0.01,
+    "train_every": 4
+  },
+  "eps": {
+    "epsilon": 0.9,
+    "epsilon_exponential_decay": 5000,
+    "epsilon_minimum": 0.1
+  },
+  "train_ep": 25,
+  "iters": 4000,
+  "eval_ep": 5,
+  "results": {
+    "DQN": {
+      "runs": [
+        {
+          "seed": 0,
+          "train_t": 34.2,
+          "total_nodes": 12,
+          "owned": [
+            12,
+            12,
+            12,
+            12,
+            12
+          ],
+          "reward": [
+            6184.0,
+            6184.0,
+            6184.0,
+            6184.0,
+            6184.0
+          ],
+          "lengths": [
+            28,
+            28,
+            27,
+            27,
+            27
+          ],
+          "owned_mean": 12.0,
+          "reward_mean": 6184.0
+        },
+        {
+          "seed": 1,
+          "train_t": 35.3,
+          "total_nodes": 12,
+          "owned": [
+            12,
+            12,
+            12,
+            12,
+            12
+          ],
+          "reward": [
+            6154.0,
+            6154.0,
+            6154.0,
+            6154.0,
+            6154.0
+          ],
+          "lengths": [
+            22,
+            22,
+            22,
+            22,
+            22
+          ],
+          "owned_mean": 12.0,
+          "reward_mean": 6154.0
+        },
+        {
+          "seed": 2,
+          "train_t": 20.2,
+          "total_nodes": 12,
+          "owned": [
+            12,
+            12,
+            12,
+            12,
+            12
+          ],
+          "reward": [
+            6154.0,
+            6154.0,
+            6154.0,
+            6154.0,
+            6154.0
+          ],
+          "lengths": [
+            22,
+            22,
+            22,
+            22,
+            22
+          ],
+          "owned_mean": 12.0,
+          "reward_mean": 6154.0
+        }
+      ],
+      "owned_mean": 12.0,
+      "owned_std": 0.0,
+      "reward_mean": 6164.0,
+      "reward_std": 14.1
+    },
+    "DRQN": {
+      "runs": [
+        {
+          "seed": 0,
+          "train_t": 95.5,
+          "total_nodes": 12,
+          "owned": [
+            12,
+            12,
+            12,
+            12,
+            12
+          ],
+          "reward": [
+            6154.0,
+            6154.0,
+            6154.0,
+            6154.0,
+            6154.0
+          ],
+          "lengths": [
+            22,
+            22,
+            22,
+            22,
+            22
+          ],
+          "owned_mean": 12.0,
+          "reward_mean": 6154.0
+        },
+        {
+          "seed": 1,
+          "train_t": 113.3,
+          "total_nodes": 12,
+          "owned": [
+            12,
+            12,
+            12,
+            12,
+            12
+          ],
+          "reward": [
+            6154.0,
+            6154.0,
+            6154.0,
+            6154.0,
+            6154.0
+          ],
+          "lengths": [
+            22,
+            22,
+            22,
+            22,
+            22
+          ],
+          "owned_mean": 12.0,
+          "reward_mean": 6154.0
+        },
+        {
+          "seed": 2,
+          "train_t": 191.4,
+          "total_nodes": 12,
+          "owned": [
+            12,
+            12,
+            12,
+            12,
+            12
+          ],
+          "reward": [
+            6154.0,
+            6154.0,
+            6154.0,
+            6154.0,
+            6154.0
+          ],
+          "lengths": [
+            22,
+            22,
+            22,
+            22,
+            22
+          ],
+          "owned_mean": 12.0,
+          "reward_mean": 6154.0
+        }
+      ],
+      "owned_mean": 12.0,
+      "owned_std": 0.0,
+      "reward_mean": 6154.0,
+      "reward_std": 0.0
+    }
+  }
+}

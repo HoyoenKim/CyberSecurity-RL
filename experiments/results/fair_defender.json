@@ -20,193 +20,193 @@
     "epsilon_exponential_decay": 5000,
     "epsilon_minimum": 0.1
   },
-  "train_ep": 25,
-  "iters": 4000,
+  "train_ep": 50,
+  "iters": 9000,
   "eval_ep": 5,
   "results": {
     "DQN": {
       "runs": [
         {
           "seed": 0,
-          "train_t": 97.7,
+          "train_t": 53.8,
           "total_nodes": 12,
           "owned": [
-            3,
+            6,
             7,
-            8,
-            4,
-            9
+            3,
+            9,
+            2
           ],
           "reward": [
-            5612.0,
-            6126.0,
-            6222.0,
-            5752.0,
-            7258.0
+            7222.0,
+            7206.0,
+            5742.0,
+            7172.0,
+            5896.0
           ],
           "lengths": [
+            51,
             36,
-            41,
-            96,
-            36,
-            111
+            46,
+            26,
+            66
           ],
-          "owned_mean": 6.2,
-          "reward_mean": 6194.0
+          "owned_mean": 5.4,
+          "reward_mean": 6647.6
         },
         {
           "seed": 1,
-          "train_t": 119.4,
+          "train_t": 60.2,
           "total_nodes": 12,
           "owned": [
-            3,
-            6,
-            2,
-            3,
-            5
+            9,
+            9,
+            8,
+            5,
+            8
           ],
           "reward": [
-            5766.0,
-            6150.0,
-            5638.0,
-            5744.0,
-            5842.0
+            7160.0,
+            7178.0,
+            7184.0,
+            5826.0,
+            7156.0
           ],
           "lengths": [
-            631,
-            356,
-            306,
-            231,
-            236
+            26,
+            416,
+            41,
+            21,
+            26
           ],
-          "owned_mean": 3.8,
-          "reward_mean": 5828.0
+          "owned_mean": 7.8,
+          "reward_mean": 6900.8
         },
         {
           "seed": 2,
-          "train_t": 180.3,
+          "train_t": 108.7,
           "total_nodes": 12,
           "owned": [
+            4,
+            5,
+            5,
             8,
-            2,
-            6,
-            1,
-            5
+            9
           ],
           "reward": [
-            6214.0,
-            5982.0,
-            5990.0,
-            5760.0,
-            6262.0
+            5744.0,
+            7288.0,
+            6108.0,
+            7226.0,
+            7246.0
           ],
           "lengths": [
-            226,
-            181,
-            2046,
-            486,
-            411
+            41,
+            306,
+            56,
+            46,
+            146
           ],
-          "owned_mean": 4.4,
-          "reward_mean": 6041.6
+          "owned_mean": 6.2,
+          "reward_mean": 6722.4
         }
       ],
-      "owned_mean": 4.8,
-      "owned_std": 1.02,
-      "reward_mean": 6021.2,
-      "reward_std": 150.1
+      "owned_mean": 6.47,
+      "owned_std": 1.0,
+      "reward_mean": 6756.9,
+      "reward_std": 106.2
     },
     "DRQN": {
       "runs": [
         {
           "seed": 0,
-          "train_t": 111.2,
+          "train_t": 217.3,
           "total_nodes": 12,
           "owned": [
             8,
+            8,
+            8,
             9,
+            3
+          ],
+          "reward": [
+            6140.0,
+            7190.0,
+            6160.0,
+            7204.0,
+            5618.0
+          ],
+          "lengths": [
+            21,
+            31,
+            31,
+            36,
+            31
+          ],
+          "owned_mean": 7.2,
+          "reward_mean": 6462.4
+        },
+        {
+          "seed": 1,
+          "train_t": 238.5,
+          "total_nodes": 12,
+          "owned": [
             9,
+            4,
+            8,
+            8,
+            9
+          ],
+          "reward": [
+            7172.0,
+            5684.0,
+            6140.0,
+            6140.0,
+            7166.0
+          ],
+          "lengths": [
+            31,
+            16,
+            21,
+            21,
+            26
+          ],
+          "owned_mean": 7.6,
+          "reward_mean": 6460.4
+        },
+        {
+          "seed": 2,
+          "train_t": 196.3,
+          "total_nodes": 12,
+          "owned": [
+            4,
+            9,
+            8,
             7,
             8
           ],
           "reward": [
-            6152.0,
-            7210.0,
-            7190.0,
-            6026.0,
-            6052.0
+            5698.0,
+            7198.0,
+            6160.0,
+            6064.0,
+            6140.0
           ],
           "lengths": [
-            26,
-            46,
-            41,
-            21,
-            41
-          ],
-          "owned_mean": 8.2,
-          "reward_mean": 6526.0
-        },
-        {
-          "seed": 1,
-          "train_t": 154.3,
-          "total_nodes": 12,
-          "owned": [
-            7,
-            5,
-            8,
-            9,
-            7
-          ],
-          "reward": [
-            6032.0,
-            7232.0,
-            6158.0,
-            7222.0,
-            5932.0
-          ],
-          "lengths": [
-            21,
+            16,
+            36,
+            36,
             56,
-            26,
-            41,
             21
           ],
           "owned_mean": 7.2,
-          "reward_mean": 6515.2
-        },
-        {
-          "seed": 2,
-          "train_t": 163.3,
-          "total_nodes": 12,
-          "owned": [
-            5,
-            8,
-            7,
-            7,
-            9
-          ],
-          "reward": [
-            5826.0,
-            6040.0,
-            6170.0,
-            7194.0,
-            7184.0
-          ],
-          "lengths": [
-            21,
-            21,
-            36,
-            56,
-            41
-          ],
-          "owned_mean": 7.2,
-          "reward_mean": 6482.8
+          "reward_mean": 6252.0
         }
       ],
-      "owned_mean": 7.53,
-      "owned_std": 0.47,
-      "reward_mean": 6508.0,
-      "reward_std": 18.4
+      "owned_mean": 7.33,
+      "owned_std": 0.19,
+      "reward_mean": 6391.6,
+      "reward_std": 98.7
     }
   }
 }
