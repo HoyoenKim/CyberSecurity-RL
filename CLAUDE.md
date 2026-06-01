@@ -236,4 +236,6 @@ sample() 반환 shape `[B,8,D]`…, 마스크 정확성(유효 길이 {2,3,8}, �
 - Chain은 둘 다 12/12로 변별력 없음(§5.1.1대로).
 - toyctf(소규모·CPU, 2seed): **DRQN 우위 없음** — DQN 6.0 vs DRQN 5.17/10, DRQN이 오히려 덜 일관적. 둘 다 과소학습(§5.1.3의 9/9 미달) → "부분관측에서 DRQN 유리" 주장도 미지지. (에피소드 조기종료 없어 비용 커서 소규모·CPU로 평가; DQN seed-0 혼자 92분.)
 
+- **γ·보상 정규화 (§7-4, 코드로 확증):** 환경 보상이 정규화 안 됨(`winning_reward=+5000`, `reward_range=(-inf, inf)`)이고 에이전트도 raw 보상 사용(안정화는 Huber + grad clamp±1뿐, 보상 레벨 아님). → **`γ=0.015`는 근시안이라기보다 정규화 안 한 큰 보상을 안정화하려는 회피책.** γ만 0.9로 올리면 **발산**(CPU 실측: 학습 후에도 에피소드가 조기종료 못 하고 iter 상한까지 flailing). 즉 README의 "장기 의존성" 프레이밍과 달리 **핵심 가설(순환 메모리가 장기 신용할당에 유리)을 검증할 무대(고 γ)가 애초에 없었음.** → `agent_dql/agent_drqn`에 `reward_scale`, `fair_compare.py`에 `REWARD_SCALE`/`GAMMA`/`OUT_SUFFIX` 옵션 추가. **정규화(reward_scale)+γ=0.9 로 제대로 재실험 진행 중**(결과 나오면 본 절에 갱신).
+
 **워크플로우 메모:** 로컬에서 코드 수정 → commit/push → 서버(newport, `~/hykim_ect/CSRL`) `git pull`로 sync. 학습은 newport conda env `hykim_ect`(전역설정 없음, `source ~/miniconda3/etc/profile.d/conda.sh` + `PYTHONNOUSERSITE=1`), GPU H100. 결과는 `~/hykim_ect/results/` → scp로 로컬 회수 후 git에 커밋.

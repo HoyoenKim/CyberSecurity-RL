@@ -323,6 +323,7 @@ class DeepQLearnerPolicy(Learner):
         seq_len: int = 8,          # 시퀀스 길이 (DRQN용)
         drqn_hidden_size: int = 256,
         train_every: int = 1,
+        reward_scale: float = 1.0,
     ):
         self.stateaction_model = CyberBattleStateActionModel(ep)
         self.batch_size = batch_size
@@ -332,6 +333,7 @@ class DeepQLearnerPolicy(Learner):
         self._nets_initialized = False
         self.train_every = train_every
         self._opt_counter = 0
+        self.reward_scale = reward_scale
 
         # DRQN 네트워크 (policy / target)
         self.policy_net = DRQN(ep, hidden_size=drqn_hidden_size).to(device)
@@ -468,6 +470,7 @@ class DeepQLearnerPolicy(Learner):
         next_actor_state: Optional[ndarray],
     ):
         """Transition을 replay memory에 넣고 DRQN optimize 호출."""
+        reward = reward * self.reward_scale  # reward normalization (review §7-4): scale large rewards
         reward_tensor = torch.tensor([reward], device=device, dtype=torch.float)  # [1]
         action_tensor = torch.tensor([[np.int_(abstract_action)]], device=device, dtype=torch.long)  # [1, 1]
         current_state_tensor = torch.as_tensor(actor_state, dtype=torch.float, device=device).unsqueeze(0)  # [1, D]

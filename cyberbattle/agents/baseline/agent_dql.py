@@ -249,6 +249,7 @@ class DeepQLearnerPolicy(Learner):
         batch_size: int,
         learning_rate: float,
         train_every: int = 1,
+        reward_scale: float = 1.0,
     ):
         self.stateaction_model = CyberBattleStateActionModel(ep)
         self.batch_size = batch_size
@@ -256,6 +257,7 @@ class DeepQLearnerPolicy(Learner):
         self.learning_rate = learning_rate
         self.train_every = train_every
         self._opt_counter = 0
+        self.reward_scale = reward_scale
 
         self.policy_net = DQN(ep).to(device)
         self.target_net = DQN(ep).to(device)
@@ -351,6 +353,7 @@ class DeepQLearnerPolicy(Learner):
         next_actor_state: Optional[ndarray],
     ):
         # store the transition in memory
+        reward = reward * self.reward_scale  # reward normalization (review §7-4): scale large rewards
         reward_tensor = torch.tensor([reward], device=device, dtype=torch.float)
         action_tensor = torch.tensor([[np.int_(abstract_action)]], device=device, dtype=torch.long)
         current_state_tensor = torch.as_tensor(actor_state, dtype=torch.float, device=device).unsqueeze(0)

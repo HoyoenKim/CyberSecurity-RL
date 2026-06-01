@@ -29,10 +29,11 @@ SEEDS = [int(s) for s in sys.argv[2].split(",")] if len(sys.argv) > 2 else [0, 1
 SIZE = 10
 TRAIN_EVERY = 4
 GAMMA = float(os.environ.get("GAMMA", "0.015"))   # review §7-4: try 0.9 for long-horizon credit
-OUT_SUFFIX = os.environ.get("OUT_SUFFIX", "")       # keep gamma-sweep results in separate files
+REWARD_SCALE = float(os.environ.get("REWARD_SCALE", "1.0"))  # review §7-4: normalize large rewards (e.g. 0.01)
+OUT_SUFFIX = os.environ.get("OUT_SUFFIX", "")       # keep gamma/reward-sweep results in separate files
 # IDENTICAL config + schedule for both agents (fair comparison)
 COMMON = dict(gamma=GAMMA, replay_memory_size=10000, target_update=10,
-              batch_size=256, learning_rate=0.01, train_every=TRAIN_EVERY)
+              batch_size=256, learning_rate=0.01, train_every=TRAIN_EVERY, reward_scale=REWARD_SCALE)
 EPS = dict(epsilon=0.9, epsilon_exponential_decay=5000, epsilon_minimum=0.1)
 TRAIN_EP = int(os.environ.get("TRAIN_EP", 50))
 ITERS = int(os.environ.get("ITERS", 9000))
