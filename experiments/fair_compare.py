@@ -28,8 +28,10 @@ SCENARIO = sys.argv[1] if len(sys.argv) > 1 else "defender"
 SEEDS = [int(s) for s in sys.argv[2].split(",")] if len(sys.argv) > 2 else [0, 1, 2]
 SIZE = 10
 TRAIN_EVERY = 4
+GAMMA = float(os.environ.get("GAMMA", "0.015"))   # review §7-4: try 0.9 for long-horizon credit
+OUT_SUFFIX = os.environ.get("OUT_SUFFIX", "")       # keep gamma-sweep results in separate files
 # IDENTICAL config + schedule for both agents (fair comparison)
-COMMON = dict(gamma=0.015, replay_memory_size=10000, target_update=10,
+COMMON = dict(gamma=GAMMA, replay_memory_size=10000, target_update=10,
               batch_size=256, learning_rate=0.01, train_every=TRAIN_EVERY)
 EPS = dict(epsilon=0.9, epsilon_exponential_decay=5000, epsilon_minimum=0.1)
 TRAIN_EP = int(os.environ.get("TRAIN_EP", 50))
@@ -120,7 +122,7 @@ def main():
     out = dict(scenario=SCENARIO, size=SIZE, seeds=SEEDS, train_every=TRAIN_EVERY, common=COMMON, eps=EPS,
                train_ep=TRAIN_EP, iters=ITERS, eval_ep=EVAL_EP, results=results)
     os.makedirs(os.path.expanduser("~/hykim_ect/results"), exist_ok=True)
-    outpath = os.path.expanduser("~/hykim_ect/results/fair_%s.json" % SCENARIO)
+    outpath = os.path.expanduser("~/hykim_ect/results/fair_%s%s.json" % (SCENARIO, OUT_SUFFIX))
     with open(outpath, "w") as f:
         json.dump(out, f, indent=2)
 
