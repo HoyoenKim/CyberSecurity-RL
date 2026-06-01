@@ -107,101 +107,11 @@ if debugging:
     a = w.StateAugmentation(o0)
     w.Feature_discovered_ports(ep).get(a)
     fe_example.encode_at(a, 0)
-'''
-# %% {"tags": []}
-# Evaluate a random agent that opportunistically exploits
-# credentials gathere in its local cache
-
-credlookup_run = learner.epsilon_greedy_search(
-    gym_env,
-    ep,
-    learner=rca.CredentialCacheExploiter(),
-    episode_count=10,
-    iteration_count=iteration_count,
-    epsilon=0.90,
-    render=False,
-    epsilon_exponential_decay=10000,
-    epsilon_minimum=0.10,
-    verbosity=Verbosity.Quiet,
-    render_last_episode_rewards_to=os.path.join(plots_dir, f"credlookup-{gymid}"),
-    title="Credential lookups (ϵ-greedy)",
-)
-
-# %% {"tags": []}
-# Evaluate a Tabular Q-learning agent
-tabularq_run = learner.epsilon_greedy_search(
-    gym_env,
-    ep,
-    learner=tqa.QTabularLearner(ep, gamma=0.015, learning_rate=0.01, exploit_percentile=100),
-    episode_count=training_episode_count,
-    iteration_count=iteration_count,
-    epsilon=0.90,
-    epsilon_exponential_decay=5000,
-    epsilon_minimum=0.01,
-    verbosity=Verbosity.Quiet,
-    render=False,
-    plot_episodes_length=False,
-    title="Tabular Q-learning",
-)
-
-# %% {"tags": []}
-# Evaluate an agent that exploits the Q-table learnt above
-tabularq_exploit_run = learner.epsilon_greedy_search(
-    gym_env,
-    ep,
-    learner=tqa.QTabularLearner(ep, trained=tabularq_run["learner"], gamma=0.0, learning_rate=0.0, exploit_percentile=90),
-    episode_count=eval_episode_count,
-    iteration_count=iteration_count,
-    epsilon=0.0,
-    render=False,
-    verbosity=Verbosity.Quiet,
-    render_last_episode_rewards_to=os.path.join(plots_dir, f"tabularq-{gymid}"),
-    title="Exploiting Q-matrix",
-)
-
-# %% {"tags": []}
-# Evaluate the Deep Q-learning agent
-dql_run = learner.epsilon_greedy_search(
-    cyberbattle_gym_env=gym_env,
-    environment_properties=ep,
-    learner=dqla.DeepQLearnerPolicy(
-        ep=ep,
-        gamma=0.015,
-        replay_memory_size=10000,
-        target_update=10,
-        batch_size=512,
-        # torch default learning rate is 1e-2
-        # a large value helps converge in less episodes
-        learning_rate=0.01,
-    ),
-    episode_count=training_episode_count,
-    iteration_count=iteration_count,
-    epsilon=0.90,
-    epsilon_exponential_decay=5000,
-    epsilon_minimum=0.10,
-    verbosity=Verbosity.Quiet,
-    render=False,
-    plot_episodes_length=False,
-    title="DQL",
-)
-
-# %% {"tags": []}
-# Evaluate an agent that exploits the Q-function learnt above
-dql_exploit_run = learner.epsilon_greedy_search(
-    gym_env,
-    ep,
-    learner=dql_run["learner"],
-    episode_count=eval_episode_count,
-    iteration_count=iteration_count,
-    epsilon=0.0,
-    epsilon_minimum=0.00,
-    render=False,
-    plot_episodes_length=False,
-    verbosity=Verbosity.Quiet,
-    render_last_episode_rewards_to=os.path.join(plots_dir, f"dql-{gymid}"),
-    title="Exploiting DQL",
-)
-'''
+# NOTE (review §7-6): random / credential-cache / tabular-Q / DQL benchmark runs used to
+# live here but were string-commented (dead code) — so this "benchmark" actually only ran
+# DRQN + random. For the full multi-agent comparison use the per-agent notebooks
+# (baseline_*, defender_*, toyctf_*) or, preferably, the seeded experiments/fair_compare.py.
+# Below this file benchmarks the DRQN agent against a random baseline.
 
 # %% {"tags": []}
 # Evaluate the Deep Recurrent Q-learning agent (DRQN)
