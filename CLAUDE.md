@@ -224,15 +224,16 @@ sample() 반환 shape `[B,8,D]`…, 마스크 정확성(유효 길이 {2,3,8}, �
 
 §7-2(불공정 비교)·§7-3(seed 없음)를 교정해, 버그 수정된 DRQN을 **동일 스케줄·하이퍼파라미터·3 seed**로 DQN과 재비교. 러너: [`experiments/fair_compare.py`](experiments/fair_compare.py) (`chain|defender|toyctf`, `train_every`로 최적화 빈도↓). 결과 JSON: `experiments/results/fair_*.json`. README §5.1.5에도 반영.
 
-| 시나리오 | DQN owned/12 | DRQN(수정) owned/12 |
+| 시나리오 | DQN owned | DRQN(수정) owned |
 |---|---|---|
-| Defender (50ep×9000it, 3seed) | 6.47 ± 1.0 (reward 6757) | **7.33 ± 0.19** (reward 6392) |
-| Chain (25ep×4000it, 3seed) | 12.0 ± 0.0 | 12.0 ± 0.0 (동률) |
+| Defender (50ep×9000it, 3seed) | 6.47 ± 1.0 / 12 (reward 6757) | **7.33 ± 0.19 / 12** (reward 6392) |
+| Chain (25ep×4000it, 3seed) | 12.0 ± 0.0 / 12 | 12.0 ± 0.0 / 12 (동률) |
+| ToyCTF (10ep×1000it, 2seed, CPU) | **6.0 ± 0.0 / 10** | 5.17 ± 0.83 / 10 |
 
 **핵심 (정직):**
 - 수정 후 DRQN **정상 학습 확인**(chain 12/12, defender ~7.3) → "DRQN이 잘 안 됐다" 해소.
 - 공정 비교 시 DRQN 우위는 **작고 주로 "일관성"**(±0.19 vs ±1.0)에 있음. reward는 오히려 DQN이 약간 높음. → **README의 "DRQN 11/11 vs DQN 7/11"은 단일 평가의 과장**이며 공정·다중seed에선 재현 안 됨(§7-3 입증).
 - Chain은 둘 다 12/12로 변별력 없음(§5.1.1대로).
-- toyctf: 에피소드가 조기 종료 안 돼(매번 iter 상한) 풀스케일 비용 큼 → 소규모로 별도 평가.
+- toyctf(소규모·CPU, 2seed): **DRQN 우위 없음** — DQN 6.0 vs DRQN 5.17/10, DRQN이 오히려 덜 일관적. 둘 다 과소학습(§5.1.3의 9/9 미달) → "부분관측에서 DRQN 유리" 주장도 미지지. (에피소드 조기종료 없어 비용 커서 소규모·CPU로 평가; DQN seed-0 혼자 92분.)
 
 **워크플로우 메모:** 로컬에서 코드 수정 → commit/push → 서버(newport, `~/hykim_ect/CSRL`) `git pull`로 sync. 학습은 newport conda env `hykim_ect`(전역설정 없음, `source ~/miniconda3/etc/profile.d/conda.sh` + `PYTHONNOUSERSITE=1`), GPU H100. 결과는 `~/hykim_ect/results/` → scp로 로컬 회수 후 git에 커밋.

@@ -401,21 +401,24 @@ This allows DRQN to quickly switch into a “recover → re-pivot → re-escalat
 
 #### 5.1.5. Fair, Seeded Re-evaluation (corrected methodology, 2026-06)
 
-> **Caveat on the tables in §5.1.1–§5.1.4:** they come from *single, unseeded* evaluation runs, and the earlier DRQN had training/evaluation bugs (see `CLAUDE.md` §7–§8: `seq_len=1`, removed negative-exploit learning, train/inference hidden-state mismatch). After fixing those bugs we re-ran a **fair, seeded** comparison — identical exploration schedule and hyperparameters for both agents, **3 seeds**, mean ± std, automated owned-node metric (`experiments/fair_compare.py`).
+> **Caveat on the tables in §5.1.1–§5.1.4:** they come from *single, unseeded* evaluation runs, and the earlier DRQN had training/evaluation bugs (see `CLAUDE.md` §7–§8: `seq_len=1`, removed negative-exploit learning, train/inference hidden-state mismatch). After fixing those bugs we re-ran a **fair, seeded** comparison — identical exploration schedule and hyperparameters for both agents, **3 seeds** (2 for ToyCTF), mean ± std, automated owned-node metric (`experiments/fair_compare.py`).
 
-| Scenario | Agent | Owned nodes (/12) | Reward |
+| Scenario | Agent | Owned nodes | Reward |
 |---|---|---:|---:|
-| Defender (50 ep × 9000 it) | DQN | 6.47 ± 1.00 | 6757 ± 106 |
-| Defender | **DRQN (fixed)** | **7.33 ± 0.19** | 6392 ± 99 |
-| Chain (25 ep × 4000 it) | DQN | 12.0 ± 0.0 | — |
-| Chain | DRQN (fixed) | 12.0 ± 0.0 | — |
+| Defender (50 ep × 9000 it) | DQN | 6.47 ± 1.00 / 12 | 6757 ± 106 |
+| Defender | **DRQN (fixed)** | **7.33 ± 0.19 / 12** | 6392 ± 99 |
+| Chain (25 ep × 4000 it) | DQN | 12.0 ± 0.0 / 12 | — |
+| Chain | DRQN (fixed) | 12.0 ± 0.0 / 12 | — |
+| ToyCTF (10 ep × 1000 it, CPU) | DQN | 6.0 ± 0.0 / 10 | 476 ± 0 |
+| ToyCTF | DRQN (fixed) | 5.17 ± 0.83 / 10 | 402 ± 74 |
 
 **Honest findings:**
 - The DRQN fix works: it now trains correctly (Chain 12/12; Defender ≈ 7.3/12).
 - Under the defender, fixed DRQN is **modestly higher in owned nodes and much more consistent** (± 0.19 vs ± 1.00), though DQN earns slightly more reward. The dramatic **“DRQN 11/11 vs DQN 7/11” of §5.1.4 does not reproduce** under a fair, seeded protocol — it reflected single best-episode runs (per-episode coverage varies widely). The robust effect of recurrence here is **stability**, not a large coverage gain.
 - On Chain both agents fully solve the task (no discrimination), as expected.
+- On ToyCTF (small scale — both agents under-trained, neither nears the §5.1.3 “9/9”), **DRQN shows no advantage**: DQN 6.0 vs DRQN 5.17 owned, and DRQN is the *less* consistent. This does **not** support §5.1.3’s claim that recurrence helps most under ToyCTF’s partial observability — at least not at a training budget reachable on shared hardware.
 
-Raw results: `experiments/results/fair_{defender,chain}.json`. (ToyCTF evaluated separately — its episodes rarely terminate early, making full runs expensive.)
+Raw results: `experiments/results/fair_{defender,chain,toyctf}.json`.
 
 ---
 

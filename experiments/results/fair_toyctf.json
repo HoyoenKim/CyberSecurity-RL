@@ -1,0 +1,131 @@
+{
+  "scenario": "toyctf",
+  "size": 10,
+  "seeds": [
+    0,
+    1
+  ],
+  "train_every": 4,
+  "common": {
+    "gamma": 0.015,
+    "replay_memory_size": 10000,
+    "target_update": 10,
+    "batch_size": 256,
+    "learning_rate": 0.01,
+    "train_every": 4
+  },
+  "eps": {
+    "epsilon": 0.9,
+    "epsilon_exponential_decay": 5000,
+    "epsilon_minimum": 0.1
+  },
+  "train_ep": 10,
+  "iters": 1000,
+  "eval_ep": 3,
+  "results": {
+    "DQN": {
+      "runs": [
+        {
+          "seed": 0,
+          "train_t": 5509.4,
+          "total_nodes": 10,
+          "owned": [
+            6,
+            6,
+            6
+          ],
+          "reward": [
+            476.0,
+            476.0,
+            476.0
+          ],
+          "lengths": [
+            1000,
+            1000,
+            1000
+          ],
+          "owned_mean": 6.0,
+          "reward_mean": 476.0
+        },
+        {
+          "seed": 1,
+          "train_t": 97.8,
+          "total_nodes": 10,
+          "owned": [
+            6,
+            6,
+            6
+          ],
+          "reward": [
+            476.0,
+            476.0,
+            476.0
+          ],
+          "lengths": [
+            1000,
+            1000,
+            1000
+          ],
+          "owned_mean": 6.0,
+          "reward_mean": 476.0
+        }
+      ],
+      "owned_mean": 6.0,
+      "owned_std": 0.0,
+      "reward_mean": 476.0,
+      "reward_std": 0.0
+    },
+    "DRQN": {
+      "runs": [
+        {
+          "seed": 0,
+          "train_t": 610.7,
+          "total_nodes": 10,
+          "owned": [
+            6,
+            1,
+            6
+          ],
+          "reward": [
+            476.0,
+            33.0,
+            476.0
+          ],
+          "lengths": [
+            1000,
+            1000,
+            1000
+          ],
+          "owned_mean": 4.33,
+          "reward_mean": 328.3
+        },
+        {
+          "seed": 1,
+          "train_t": 480.9,
+          "total_nodes": 10,
+          "owned": [
+            6,
+            6,
+            6
+          ],
+          "reward": [
+            476.0,
+            476.0,
+            476.0
+          ],
+          "lengths": [
+            1000,
+            1000,
+            1000
+          ],
+          "owned_mean": 6.0,
+          "reward_mean": 476.0
+        }
+      ],
+      "owned_mean": 5.17,
+      "owned_std": 0.83,
+      "reward_mean": 402.1,
+      "reward_std": 73.8
+    }
+  }
+}
