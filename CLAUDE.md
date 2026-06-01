@@ -216,4 +216,23 @@ DRQN 학습/평가 정합성 버그 3건을 수정. "DRQN이 잘 안 됐다"의 
 sample() 반환 shape `[B,8,D]`…, 마스크 정확성(유효 길이 {2,3,8}, 패딩 `done=1`·`state=0`), 마스킹 Huber loss 유한 + `fc_in` 그래디언트 흐름(|grad|>0) → **ALL CHECKS PASSED**.
 전체 학습 재현은 WSL conda `cybersim` 환경에서 노트북 실행 필요.
 
-**아직 안 고친 것 (코드 버그가 아닌 실험 설계 이슈):** DQL↔DRQN epsilon 스케줄 불일치(7-2), seed/다중실행/CI(7-3), γ=0.015(7-4), `notebook_benchmark` 죽은 코드·저장소 위생(7-5~7-6), README 정정(7-7).
+**아직 안 고친 것 (코드 버그가 아닌 실험 설계 이슈):** DQL↔DRQN epsilon 스케줄 불일치(7-2), seed/다중실행/CI(7-3), γ=0.015(7-4), `notebook_benchmark` 죽은 코드·저장소 위생(7-5~7-6).
+
+---
+
+## 9. 공정·다중seed 재평가 결과 (2026-06-01)
+
+§7-2(불공정 비교)·§7-3(seed 없음)를 교정해, 버그 수정된 DRQN을 **동일 스케줄·하이퍼파라미터·3 seed**로 DQN과 재비교. 러너: [`experiments/fair_compare.py`](experiments/fair_compare.py) (`chain|defender|toyctf`, `train_every`로 최적화 빈도↓). 결과 JSON: `experiments/results/fair_*.json`. README §5.1.5에도 반영.
+
+| 시나리오 | DQN owned/12 | DRQN(수정) owned/12 |
+|---|---|---|
+| Defender (50ep×9000it, 3seed) | 6.47 ± 1.0 (reward 6757) | **7.33 ± 0.19** (reward 6392) |
+| Chain (25ep×4000it, 3seed) | 12.0 ± 0.0 | 12.0 ± 0.0 (동률) |
+
+**핵심 (정직):**
+- 수정 후 DRQN **정상 학습 확인**(chain 12/12, defender ~7.3) → "DRQN이 잘 안 됐다" 해소.
+- 공정 비교 시 DRQN 우위는 **작고 주로 "일관성"**(±0.19 vs ±1.0)에 있음. reward는 오히려 DQN이 약간 높음. → **README의 "DRQN 11/11 vs DQN 7/11"은 단일 평가의 과장**이며 공정·다중seed에선 재현 안 됨(§7-3 입증).
+- Chain은 둘 다 12/12로 변별력 없음(§5.1.1대로).
+- toyctf: 에피소드가 조기 종료 안 돼(매번 iter 상한) 풀스케일 비용 큼 → 소규모로 별도 평가.
+
+**워크플로우 메모:** 로컬에서 코드 수정 → commit/push → 서버(newport, `~/hykim_ect/CSRL`) `git pull`로 sync. 학습은 newport conda env `hykim_ect`(전역설정 없음, `source ~/miniconda3/etc/profile.d/conda.sh` + `PYTHONNOUSERSITE=1`), GPU H100. 결과는 `~/hykim_ect/results/` → scp로 로컬 회수 후 git에 커밋.

@@ -271,7 +271,7 @@ Evaluate attacker agents on `CyberBattleToyCtf-v0`. A reference/solution-style r
 ### 4.4. Experiment 4 — Adding a Defender (Blue Team) and Re-evaluating
 Introduce a defender and measure robustness / performance degradation of attacker agents.
 
-#### 4.4.1. Deep Q-Learning
+#### 4.4.1. Rule-Based
 
 ```bash
 ./notebooks/run_defender_rulebased.sh python3
@@ -293,7 +293,7 @@ Introduce a defender and measure robustness / performance degradation of attacke
 ./notebooks/run_defender_drql.sh python3
 ```
 
-![defender_dql](figures/defender_drql.gif)
+![defender_drql](figures/defender_drql.gif)
 
 ---
 
@@ -396,6 +396,26 @@ In contrast, DRQN retains 11/11 exploitation, suggesting that recurrence helps t
 - which pivots remain viable given the most recent outcomes.
 
 This allows DRQN to quickly switch into a “recover → re-pivot → re-escalate” mode instead of repeatedly committing to broken sequences. Meanwhile, Rule-Based degrades (4/11 found, 3/11 exploited) because fixed heuristics tend to follow predictable action patterns and cannot adapt to defender-induced resets, leading to repeated scans and incomplete exploitation chains.
+
+---
+
+#### 5.1.5. Fair, Seeded Re-evaluation (corrected methodology, 2026-06)
+
+> **Caveat on the tables in §5.1.1–§5.1.4:** they come from *single, unseeded* evaluation runs, and the earlier DRQN had training/evaluation bugs (see `CLAUDE.md` §7–§8: `seq_len=1`, removed negative-exploit learning, train/inference hidden-state mismatch). After fixing those bugs we re-ran a **fair, seeded** comparison — identical exploration schedule and hyperparameters for both agents, **3 seeds**, mean ± std, automated owned-node metric (`experiments/fair_compare.py`).
+
+| Scenario | Agent | Owned nodes (/12) | Reward |
+|---|---|---:|---:|
+| Defender (50 ep × 9000 it) | DQN | 6.47 ± 1.00 | 6757 ± 106 |
+| Defender | **DRQN (fixed)** | **7.33 ± 0.19** | 6392 ± 99 |
+| Chain (25 ep × 4000 it) | DQN | 12.0 ± 0.0 | — |
+| Chain | DRQN (fixed) | 12.0 ± 0.0 | — |
+
+**Honest findings:**
+- The DRQN fix works: it now trains correctly (Chain 12/12; Defender ≈ 7.3/12).
+- Under the defender, fixed DRQN is **modestly higher in owned nodes and much more consistent** (± 0.19 vs ± 1.00), though DQN earns slightly more reward. The dramatic **“DRQN 11/11 vs DQN 7/11” of §5.1.4 does not reproduce** under a fair, seeded protocol — it reflected single best-episode runs (per-episode coverage varies widely). The robust effect of recurrence here is **stability**, not a large coverage gain.
+- On Chain both agents fully solve the task (no discrimination), as expected.
+
+Raw results: `experiments/results/fair_{defender,chain}.json`. (ToyCTF evaluated separately — its episodes rarely terminate early, making full runs expensive.)
 
 ---
 
