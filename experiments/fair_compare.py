@@ -51,7 +51,9 @@ def make_env():
                      attacker_goal=AttackerGoal(own_atleast=0, own_atleast_percent=1.0),
                      defender_constraint=DefenderConstraint(maintain_sla=0.80),
                      defender_agent=ScanAndReimageCompromisedMachines(probability=0.6, scan_capacity=2, scan_frequency=5))
-    else:
+    elif SCENARIO == "toyctf":
+        e = gym.make("CyberBattleToyCtf-v0")
+    else:  # chain
         e = gym.make("CyberBattleChain-v0", size=SIZE)
     return cast(CyberBattleEnv, e.unwrapped)
 

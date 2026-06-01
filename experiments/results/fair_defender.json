@@ -1,0 +1,212 @@
+{
+  "scenario": "defender",
+  "size": 10,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "train_every": 4,
+  "common": {
+    "gamma": 0.015,
+    "replay_memory_size": 10000,
+    "target_update": 10,
+    "batch_size": 256,
+    "learning_rate": 0.01,
+    "train_every": 4
+  },
+  "eps": {
+    "epsilon": 0.9,
+    "epsilon_exponential_decay": 5000,
+    "epsilon_minimum": 0.1
+  },
+  "train_ep": 25,
+  "iters": 4000,
+  "eval_ep": 5,
+  "results": {
+    "DQN": {
+      "runs": [
+        {
+          "seed": 0,
+          "train_t": 97.7,
+          "total_nodes": 12,
+          "owned": [
+            3,
+            7,
+            8,
+            4,
+            9
+          ],
+          "reward": [
+            5612.0,
+            6126.0,
+            6222.0,
+            5752.0,
+            7258.0
+          ],
+          "lengths": [
+            36,
+            41,
+            96,
+            36,
+            111
+          ],
+          "owned_mean": 6.2,
+          "reward_mean": 6194.0
+        },
+        {
+          "seed": 1,
+          "train_t": 119.4,
+          "total_nodes": 12,
+          "owned": [
+            3,
+            6,
+            2,
+            3,
+            5
+          ],
+          "reward": [
+            5766.0,
+            6150.0,
+            5638.0,
+            5744.0,
+            5842.0
+          ],
+          "lengths": [
+            631,
+            356,
+            306,
+            231,
+            236
+          ],
+          "owned_mean": 3.8,
+          "reward_mean": 5828.0
+        },
+        {
+          "seed": 2,
+          "train_t": 180.3,
+          "total_nodes": 12,
+          "owned": [
+            8,
+            2,
+            6,
+            1,
+            5
+          ],
+          "reward": [
+            6214.0,
+            5982.0,
+            5990.0,
+            5760.0,
+            6262.0
+          ],
+          "lengths": [
+            226,
+            181,
+            2046,
+            486,
+            411
+          ],
+          "owned_mean": 4.4,
+          "reward_mean": 6041.6
+        }
+      ],
+      "owned_mean": 4.8,
+      "owned_std": 1.02,
+      "reward_mean": 6021.2,
+      "reward_std": 150.1
+    },
+    "DRQN": {
+      "runs": [
+        {
+          "seed": 0,
+          "train_t": 111.2,
+          "total_nodes": 12,
+          "owned": [
+            8,
+            9,
+            9,
+            7,
+            8
+          ],
+          "reward": [
+            6152.0,
+            7210.0,
+            7190.0,
+            6026.0,
+            6052.0
+          ],
+          "lengths": [
+            26,
+            46,
+            41,
+            21,
+            41
+          ],
+          "owned_mean": 8.2,
+          "reward_mean": 6526.0
+        },
+        {
+          "seed": 1,
+          "train_t": 154.3,
+          "total_nodes": 12,
+          "owned": [
+            7,
+            5,
+            8,
+            9,
+            7
+          ],
+          "reward": [
+            6032.0,
+            7232.0,
+            6158.0,
+            7222.0,
+            5932.0
+          ],
+          "lengths": [
+            21,
+            56,
+            26,
+            41,
+            21
+          ],
+          "owned_mean": 7.2,
+          "reward_mean": 6515.2
+        },
+        {
+          "seed": 2,
+          "train_t": 163.3,
+          "total_nodes": 12,
+          "owned": [
+            5,
+            8,
+            7,
+            7,
+            9
+          ],
+          "reward": [
+            5826.0,
+            6040.0,
+            6170.0,
+            7194.0,
+            7184.0
+          ],
+          "lengths": [
+            21,
+            21,
+            36,
+            56,
+            41
+          ],
+          "owned_mean": 7.2,
+          "reward_mean": 6482.8
+        }
+      ],
+      "owned_mean": 7.53,
+      "owned_std": 0.47,
+      "reward_mean": 6508.0,
+      "reward_std": 18.4
+    }
+  }
+}
