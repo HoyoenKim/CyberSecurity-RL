@@ -27,7 +27,7 @@ In addition, it implements a **Deep Recurrent Q-Learning (DRQL/DRQN)** agent by 
 - **Rule-Based (CredentialCacheExploiter):** A lightweight baseline that prioritizes exploiting the **credential cache**. It generates an action using cached credentials; if the action is invalid or undefined, it falls back to random exploration.
 - **Tabular Q-Learning:** Learns a discrete Q-table over a handcrafted state representation (effective in small or simpler settings).
 - **Deep Q-Learning (DQL / DQN):** Uses a neural network to approximate \(Q(s,a)\), enabling learning in larger state spaces.
-- **Deep Recurrent Q-Learning (DRQL / DRQN):** Extends DQL with recurrence (LSTM) to maintain a history-dependent hidden state, which can help when observations are partial or delayed.
+- **Deep Recurrent Q-Learning (DRQL / DRQN):** Extends DQL with recurrence (LSTM) to maintain a history-dependent hidden state, which can help when observations are partial or delayed. *(Note: in this project's fair, seeded re-evaluation this advantage over DQN did not materialize — see §5.1.5.)*
 
 ### 2.2 Training / Evaluation
 - **Training:** Uses epsilon-greedy exploration. DQL/DRQL are trained with experience replay and periodic target-network updates.
@@ -298,11 +298,21 @@ Introduce a defender and measure robustness / performance degradation of attacke
 ---
 
 ## 5. Discussion
+
+> **⚠️ Key finding (revised, 2026-06) — read this first.**
+> The result tables in §5.1.1–§5.1.4 are from **single, unseeded runs with an earlier, buggy DRQN** and **overstate DRQN**. After fixing the DRQN bugs and re-running a **fair, seeded** comparison (**§5.1.5**):
+> - **DRQN ≈ DQN.** Under the defender DRQN is only *modestly* higher and mainly *more consistent* — **not** the "11/11 vs 7/11" shown below. Chain is a tie; on ToyCTF **DQN is actually slightly better**.
+> - The claim that recurrence (DRQN) is clearly superior is **not supported** under a fair protocol, and its hypothesized long-horizon benefit was never actually testable (γ=0.015 + no reward normalization — see `CLAUDE.md` §7-4 / §9).
+>
+> §5.1.1–§5.1.4 are kept for the record but are **superseded by §5.1.5**.
+
 ### 5.1. Result Summary & Analysis
 
 ---
 
 #### 5.1.1. Experiment 1 — Baseline Attacker Training & Evaluation (Chain Network)
+
+> ⚠️ Single, unseeded run with the pre-fix DRQN. See **§5.1.5** for a fair, seeded re-evaluation.
 
 | Agent | Nodes Found | Nodes Exploited |
 |---:|:---:|:---:|
@@ -359,6 +369,8 @@ Training on a moderately larger setting (size 10) increases trajectory diversity
 
 #### 5.1.3. Experiment 3 — Toy CTF Evaluation (Attacker Agents)
 
+> ⚠️ Single, unseeded run with the pre-fix DRQN. In the fair, seeded re-run (**§5.1.5**) DQN slightly *outperforms* DRQN on ToyCTF.
+
 | Agent | Nodes Found | Nodes Exploited |
 |---:|:---:|:---:|
 | Answer (Oracle) | 9 / 9 | 5 / 5 |
@@ -379,6 +391,8 @@ As a result, DRQN tends to converge to more consistent attack sequences (scan �
 ---
 
 #### 5.1.4. Experiment 4 — Adding a Defender (Blue Team) and Re-evaluating
+
+> ⚠️ Single, unseeded run with the pre-fix DRQN — **the "11/11 vs 7/11" below does NOT reproduce.** Fairly compared with 3 seeds (**§5.1.5**): DRQN 7.33 ± 0.19 vs DQN 6.47 ± 1.00 owned / 12.
 
 | Agent | Nodes Found | Nodes Exploited |
 |---:|:---:|:---:|
